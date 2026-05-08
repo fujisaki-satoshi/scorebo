@@ -791,7 +791,7 @@ function EditSheet({ game, onClose }: { game: Game; onClose: () => void }) {
                 }`}
               >
                 <SportIcon sport={s} size={28} className="mx-auto mb-0.5 block" />
-                {SPORT_META[s].shortLabel}
+                {SPORT_META[s].label}
               </button>
             ))}
           </div>

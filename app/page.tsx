@@ -96,14 +96,38 @@ export default function HomePage() {
   return (
     <>
       <header className="bg-brand px-[18px] pt-6 pb-[18px] text-white">
-        <div className="mb-[18px] flex items-center gap-2.5">
-          <BrandMark size={36} />
-          <div>
-            <div className="text-[20px] font-bold leading-[1.1] tracking-[0.04em]">スコアボ</div>
-            <div className="mt-0.5 text-[9px] tracking-[0.18em] opacity-85">
-              SCORE SHARING APP
+        <div className="mb-[18px] flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <BrandMark size={36} />
+            <div>
+              <div className="text-[20px] font-bold leading-[1.1] tracking-[0.04em]">スコアボ</div>
+              <div className="mt-0.5 text-[9px] tracking-[0.18em] opacity-85">
+                SCORE SHARING APP
+              </div>
             </div>
           </div>
+          <Link
+            href="/help"
+            aria-label="使い方ガイド"
+            className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-[12px] font-semibold text-white active:bg-white/25"
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" />
+              <path d="M12 17h.01" />
+            </svg>
+            使い方
+          </Link>
         </div>
 
         <label className="mb-3 flex items-center gap-2 rounded-xl bg-white px-3.5 py-2.5">

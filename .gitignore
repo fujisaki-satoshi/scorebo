@@ -36,6 +36,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# firebase
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+
 # claude code (worktrees, local settings)
 .claude/
 

@@ -1,0 +1,55 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isStr(v, min, max) {
+      return v is string && v.size() >= min && v.size() <= max;
+    }
+    function isSport(v) {
+      return v in ['baseball', 'softball', 'kickball'];
+    }
+    function isStatus(v) {
+      return v in ['in_progress', 'completed'];
+    }
+    function isMaxInnings(v) {
+      return v is int && v >= 1 && v <= 99;
+    }
+    function isInningList(v) {
+      return v is list && v.size() <= 30;
+    }
+
+    function hasGameKeys(data) {
+      return data.keys().hasOnly(
+        ['sport','date','location','team_top','team_bottom','max_innings','innings','status','created_at']
+      ) && data.keys().hasAll(
+        ['sport','date','location','team_top','team_bottom','max_innings','innings','status','created_at']
+      );
+    }
+
+    function validGameShape(data) {
+      return isSport(data.sport)
+        && isStr(data.date, 1, 10)
+        && data.location is string && data.location.size() <= 100
+        && isStr(data.team_top, 1, 50)
+        && isStr(data.team_bottom, 1, 50)
+        && isMaxInnings(data.max_innings)
+        && isInningList(data.innings)
+        && isStatus(data.status);
+    }
+
+    match /games/{gameId} {
+      allow read: if true;
+
+      allow create: if hasGameKeys(request.resource.data)
+        && validGameShape(request.resource.data)
+        && request.resource.data.created_at == request.time;
+
+      allow update: if hasGameKeys(request.resource.data)
+        && validGameShape(request.resource.data)
+        && request.resource.data.created_at == resource.data.created_at;
+
+      allow delete: if true;
+    }
+  }
+}
