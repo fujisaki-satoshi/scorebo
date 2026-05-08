@@ -6,6 +6,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import { useCallback, useEffect, useState } from "react";
 
 import { SportIcon } from "@/app/_components/SportIcon";
+import { track } from "@/lib/analytics";
 import {
   currentInning,
   deleteGame,
@@ -135,6 +136,7 @@ export function GameView({ id }: { id: string }) {
     try {
       const nextInnings = setInning(game.innings, editingInning, localTop, localBottom);
       await updateInnings(game.id, nextInnings);
+      track("inning_saved", { sport: game.sport, inning: editingInning });
       // advance edit cursor to next incomplete inning
       const advance = currentInning(nextInnings, game.max_innings);
       setEditingInning(advance);
@@ -153,6 +155,7 @@ export function GameView({ id }: { id: string }) {
     const next: typeof game.status = game.status === "completed" ? "in_progress" : "completed";
     try {
       await updateStatus(game.id, next);
+      track("game_status_changed", { sport: game.sport, status: next });
     } catch (e) {
       setError((e as Error).message);
     }
@@ -188,7 +191,10 @@ export function GameView({ id }: { id: string }) {
         <div className="ml-1 flex-1 text-base font-semibold">スコア</div>
         <button
           type="button"
-          onClick={() => setModal("share")}
+          onClick={() => {
+            track("qr_share_opened", { sport: game.sport });
+            setModal("share");
+          }}
           className="inline-flex items-center gap-1 rounded-full bg-brand-light px-3 py-1.5 text-[13px] font-semibold text-brand-dark"
         >
           <svg
@@ -626,6 +632,7 @@ function ShareModal({ game, onClose }: { game: Game; onClose: () => void }) {
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
+      track("qr_share_copy", { sport: game.sport });
       setTimeout(() => setCopied(false), 1500);
     } catch {
       // ignore
@@ -698,6 +705,7 @@ function ShareModal({ game, onClose }: { game: Game; onClose: () => void }) {
             href={lineHref}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => track("qr_share_line", { sport: game.sport })}
             className="flex items-center justify-center gap-2 rounded-xl border border-line-green bg-line-green px-1.5 py-3.5 text-[14px] font-semibold text-white"
           >
             <svg viewBox="0 0 36 36" className="h-6 w-6">
@@ -945,6 +953,7 @@ function DeleteDialog({
     setError(null);
     try {
       await deleteGame(game.id);
+      track("game_deleted", { sport: game.sport });
       onDeleted();
     } catch (e) {
       setError((e as Error).message);

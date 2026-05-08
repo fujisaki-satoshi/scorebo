@@ -54,6 +54,7 @@ export async function createGame(draft: GameDraft) {
     innings: [],
     status: "in_progress" as GameStatus,
     created_at: serverTimestamp(),
+    updated_at: serverTimestamp(),
   });
   return ref.id;
 }
@@ -70,18 +71,18 @@ export function watchGame(id: string, cb: (game: Game | null) => void) {
 }
 
 export async function updateInnings(id: string, innings: InningScore[]) {
-  await updateDoc(doc(db, COL, id), { innings });
+  await updateDoc(doc(db, COL, id), { innings, updated_at: serverTimestamp() });
 }
 
 export async function updateStatus(id: string, status: GameStatus) {
-  await updateDoc(doc(db, COL, id), { status });
+  await updateDoc(doc(db, COL, id), { status, updated_at: serverTimestamp() });
 }
 
 export async function updateGameMeta(
   id: string,
   patch: Partial<Pick<Game, "sport" | "date" | "location" | "team_top" | "team_bottom" | "max_innings">>,
 ) {
-  await updateDoc(doc(db, COL, id), patch);
+  await updateDoc(doc(db, COL, id), { ...patch, updated_at: serverTimestamp() });
 }
 
 export async function deleteGame(id: string) {

@@ -13,41 +13,56 @@ service cloud.firestore {
       return v in ['in_progress', 'completed'];
     }
     function isMaxInnings(v) {
-      return v is int && v >= 1 && v <= 99;
+      return v is int && v >= 1 && v <= 30;
+    }
+    function isDate(v) {
+      return v is string && v.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
     }
     function isInningList(v) {
-      return v is list && v.size() <= 30;
+      return v is list && v.size() <= 20;
     }
 
-    function hasGameKeys(data) {
-      return data.keys().hasOnly(
-        ['sport','date','location','team_top','team_bottom','max_innings','innings','status','created_at']
-      ) && data.keys().hasAll(
-        ['sport','date','location','team_top','team_bottom','max_innings','innings','status','created_at']
-      );
+    function gameKeysOk(data) {
+      return data.keys().hasOnly([
+        'sport','date','location','team_top','team_bottom',
+        'max_innings','innings','status','created_at','updated_at'
+      ]) && data.keys().hasAll([
+        'sport','date','location','team_top','team_bottom',
+        'max_innings','innings','status','created_at','updated_at'
+      ]);
     }
 
     function validGameShape(data) {
       return isSport(data.sport)
-        && isStr(data.date, 1, 10)
+        && isDate(data.date)
         && data.location is string && data.location.size() <= 100
         && isStr(data.team_top, 1, 50)
         && isStr(data.team_bottom, 1, 50)
         && isMaxInnings(data.max_innings)
         && isInningList(data.innings)
-        && isStatus(data.status);
+        && isStatus(data.status)
+        && data.created_at is timestamp
+        && data.updated_at is timestamp;
     }
 
     match /games/{gameId} {
       allow read: if true;
 
-      allow create: if hasGameKeys(request.resource.data)
+      allow create: if gameKeysOk(request.resource.data)
         && validGameShape(request.resource.data)
-        && request.resource.data.created_at == request.time;
+        && request.resource.data.created_at == request.time
+        && request.resource.data.updated_at == request.time
+        && request.resource.data.innings.size() == 0
+        && request.resource.data.status == 'in_progress';
 
-      allow update: if hasGameKeys(request.resource.data)
+      allow update: if gameKeysOk(request.resource.data)
         && validGameShape(request.resource.data)
-        && request.resource.data.created_at == resource.data.created_at;
+        && request.resource.data.created_at == resource.data.created_at
+        && request.resource.data.updated_at == request.time
+        && (
+          !('updated_at' in resource.data.keys())
+          || request.resource.data.updated_at > resource.data.updated_at
+        );
 
       allow delete: if true;
     }

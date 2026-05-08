@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { SportIcon } from "@/app/_components/SportIcon";
+import { track } from "@/lib/analytics";
 import { createGame } from "@/lib/games";
+import { checkCreateRateLimit, RateLimitError, recordCreate } from "@/lib/rate-limit";
 import { SPORT_META, SPORT_ORDER } from "@/lib/sports";
 import type { Sport } from "@/lib/types";
 
@@ -44,6 +46,7 @@ export default function NewGamePage() {
     setSubmitting(true);
     setError(null);
     try {
+      checkCreateRateLimit();
       const id = await createGame({
         sport,
         date,
@@ -52,9 +55,13 @@ export default function NewGamePage() {
         team_top: teamTop.trim(),
         team_bottom: teamBottom.trim(),
       });
+      recordCreate();
+      track("game_created", { sport, max_innings: maxInnings });
       router.push(`/games/${id}`);
     } catch (e) {
-      setError((e as Error).message);
+      setError(
+        e instanceof RateLimitError ? e.message : (e as Error).message,
+      );
       setSubmitting(false);
     }
   }
