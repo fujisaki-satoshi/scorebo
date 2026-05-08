@@ -1,20 +1,16 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "スコアボ",
-  description: "野球・ソフトボール・キックベースの試合スコアをイニングごとに記録・QRコードで共有できるアプリ",
+  title: "スコアボ — SCORE SHARING APP",
+  description:
+    "野球・ソフトボール・キックベースの試合スコアをイニングごとに記録し、QRコードで共有できるスマホ向けWebアプリ",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1a7a35",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -23,11 +19,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="ja"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-zinc-50">{children}</body>
+    <html lang="ja" className="h-full antialiased">
+      <body className="min-h-screen bg-canvas text-ink">
+        <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-canvas shadow-[0_0_0_1px_rgba(0,0,0,0.04)]">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }

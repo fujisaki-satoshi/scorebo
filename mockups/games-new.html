@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スコアボ 試合作成画面モック</title>
+<style>
+  :root {
+    --brand: #1a7a35;
+    --brand-dark: #145e29;
+    --brand-light: #e8f5ed;
+    --bg: #f5f7f5;
+    --card: #ffffff;
+    --text: #1c1c1c;
+    --text-sub: #666;
+    --border: #e2e6e2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #ddd;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  .preview-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 24px 12px;
+    min-height: 100vh;
+  }
+  .device {
+    width: 390px;
+    max-width: 100%;
+    background: var(--bg);
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  }
+
+  .sub-header {
+    background: var(--card);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px 4px 4px;
+    color: var(--brand);
+    cursor: pointer;
+    background: none; border: none;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .sub-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .main-content { padding: 18px 16px 32px; }
+
+  /* フィールドカード(ラベル外) */
+  .field-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-sub);
+    margin-bottom: 10px;
+    letter-spacing: 0.04em;
+  }
+  .field-label .req {
+    color: #c0392b;
+    margin-left: 3px;
+  }
+
+  /* 競技セレクタ(大きめ) */
+  .sport-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .sport-option {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 4px 10px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .sport-option.active {
+    border-color: var(--brand);
+    background: var(--brand-light);
+    color: var(--brand-dark);
+  }
+  .sport-option .ico {
+    width: 40px; height: 40px;
+    display: block;
+    margin: 0 auto 4px;
+  }
+
+  /* 横2列(試合日+回数) */
+  .row-2col {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 10px;
+  }
+  .row-2col .field-card { margin-bottom: 0; }
+
+  .form-input {
+    width: 100%;
+    padding: 12px 12px;
+    font-size: 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    outline: none;
+    -webkit-appearance: none;
+    color: var(--text);
+  }
+  .form-input:focus {
+    border-color: var(--brand);
+    background: var(--card);
+    box-shadow: 0 0 0 3px var(--brand-light);
+  }
+
+  /* チーム入力(縦並び+先攻/後攻バッジ) */
+  .team-input-row {
+    display: flex;
+    align-items: center;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px 8px 4px 12px;
+  }
+  .team-input-row + .team-input-row { margin-top: 8px; }
+  .team-input-row:focus-within {
+    border-color: var(--brand);
+    background: var(--card);
+    box-shadow: 0 0 0 3px var(--brand-light);
+  }
+  .team-input-row .badge-side {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 6px;
+    margin-right: 10px;
+    background: var(--brand-light);
+    color: var(--brand-dark);
+  }
+  .team-input-row input {
+    flex: 1;
+    padding: 12px 0;
+    font-size: 16px;
+    border: none;
+    outline: none;
+    background: transparent;
+  }
+  .team-helper {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--text-sub);
+    line-height: 1.5;
+  }
+
+  /* CTA */
+  .submit-bar { margin-top: 22px; }
+  .submit-btn {
+    display: block;
+    width: 100%;
+    background: var(--brand);
+    color: #fff;
+    border: none;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(26, 122, 53, 0.25);
+    cursor: pointer;
+  }
+  .submit-btn:active { background: var(--brand-dark); }
+  .submit-helper {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-sub);
+  }
+
+  .note {
+    max-width: 390px;
+    margin: 16px auto 0;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #555;
+    background: #fff8dc;
+    border: 1px solid #e8d97a;
+    border-radius: 8px;
+    line-height: 1.6;
+  }
+  .note b { color: #846200; }
+</style>
+</head>
+<body>
+
+<div class="preview-wrap">
+  <div style="width: 390px; max-width: 100%;">
+
+    <div class="device">
+      <header class="sub-header">
+        <button class="back-btn" aria-label="戻る">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          もどる
+        </button>
+        <div class="sub-title" style="margin-left:8px;">試合を作成</div>
+      </header>
+
+      <main class="main-content">
+        <!-- 競技種別 -->
+        <div class="field-card">
+          <div class="field-label">競技種別<span class="req">*</span></div>
+          <div class="sport-grid">
+            <div class="sport-option active">
+              <svg class="ico" viewBox="0 0 24 24" fill="#fff" stroke="#1a1a1a" stroke-width="1.2"><circle cx="12" cy="12" r="10" stroke-width="1.7"/><path d="M7 4.8 Q10.2 12 7 19.2" fill="none" stroke="#d93025" stroke-width="1.4" stroke-linecap="round"/><path d="M17 4.8 Q13.8 12 17 19.2" fill="none" stroke="#d93025" stroke-width="1.4" stroke-linecap="round"/></svg>
+              野球
+            </div>
+            <div class="sport-option">
+              <svg class="ico" viewBox="0 0 24 24" fill="#fff" stroke="#1a1a1a" stroke-width="1.2"><circle cx="12" cy="12" r="10" fill="#f4c430" stroke-width="1.7"/><path d="M7 4.8 Q10.2 12 7 19.2" fill="none" stroke="#d93025" stroke-width="1.8" stroke-linecap="round"/><path d="M17 4.8 Q13.8 12 17 19.2" fill="none" stroke="#d93025" stroke-width="1.8" stroke-linecap="round"/></svg>
+              ソフトボール
+            </div>
+            <div class="sport-option">
+              <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fff" stroke="#1a1a1a" stroke-width="1.7"/><polygon points="7.5,3.6 11,6.2 9.7,10.3 5.3,10.3 4,6.2" fill="#1a7a35"/><polygon points="16.5,3.6 20,6.2 18.7,10.3 14.3,10.3 13,6.2" fill="#1a7a35"/><polygon points="7.5,20.4 11,17.8 9.7,13.7 5.3,13.7 4,17.8" fill="#d93025"/><polygon points="16.5,20.4 20,17.8 18.7,13.7 14.3,13.7 13,17.8" fill="#d93025"/><polygon points="12,9.5 14.85,11.57 13.76,14.93 10.24,14.93 9.15,11.57" fill="#f4c430" stroke="#1a1a1a" stroke-width="0.6"/></svg>
+              キックベース
+            </div>
+          </div>
+        </div>
+
+        <!-- 試合日 + 回数(最大) -->
+        <div class="row-2col">
+          <div class="field-card">
+            <div class="field-label">試合日<span class="req">*</span></div>
+            <input class="form-input" type="date" value="2026-05-08">
+          </div>
+          <div class="field-card">
+            <div class="field-label">回数(最大)</div>
+            <input class="form-input" type="number" value="7" min="1" max="20">
+          </div>
+        </div>
+
+        <!-- 場所 -->
+        <div class="field-card">
+          <div class="field-label">場所・グラウンド名</div>
+          <input class="form-input" type="text" placeholder="例: 福井県営球場 第2グラウンド">
+        </div>
+
+        <!-- 対戦チーム(縦並び+先攻/後攻バッジ) -->
+        <div class="field-card">
+          <div class="field-label">対戦チーム<span class="req">*</span></div>
+          <div class="team-input-row">
+            <span class="badge-side">先攻</span>
+            <input type="text" placeholder="先攻チーム名">
+          </div>
+          <div class="team-input-row">
+            <span class="badge-side">後攻</span>
+            <input type="text" placeholder="後攻チーム名">
+          </div>
+          <div class="team-helper">スコア表で上段が先攻、下段が後攻になります。</div>
+        </div>
+
+        <div class="submit-bar">
+          <button class="submit-btn">試合を作成して共有する</button>
+          <div class="submit-helper">作成するとURLとQRコードが発行されます</div>
+        </div>
+      </main>
+    </div>
+
+    <div class="note">
+      <b>モック注記:</b> 添付案ベース。競技は大型ボタン(枠線でアクティブ)、試合日と回数(最大)は2列、対戦チームは縦並びの先攻/後攻バッジ付き(現行案を維持)。回数(最大)のデフォルトは選択中競技に合わせて自動設定する想定: 野球9・ソフトボール7・キックベース5。スコア画面でイニング追加も可能(競技差や延長戦に対応)。
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
