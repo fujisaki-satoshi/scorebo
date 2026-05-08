@@ -6,6 +6,7 @@ import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 
 import { BrandMark } from "@/app/_components/BrandMark";
 import { SportIcon } from "@/app/_components/SportIcon";
+import { formatGameDate } from "@/lib/dates";
 import {
   PAGE_SIZE,
   currentInning,
@@ -17,13 +18,6 @@ import { SPORT_META, SPORT_ORDER } from "@/lib/sports";
 import type { Game, Sport } from "@/lib/types";
 
 type SportFilter = Sport | "all";
-
-function formatDate(date: string): string {
-  if (!date) return "";
-  const [, m, d] = date.split("-");
-  if (!m || !d) return date;
-  return `${Number(m)}/${Number(d)}`;
-}
 
 export default function HomePage() {
   const [games, setGames] = useState<Game[]>([]);
@@ -288,11 +282,11 @@ function GameCard({ game }: { game: Game }) {
 
   let statusText: string;
   if (live) {
-    statusText = `${formatDate(game.date)} 進行中・${cur}回`;
+    statusText = `${formatGameDate(game.date)} 進行中・${cur}回`;
   } else if (game.status === "completed") {
-    statusText = `${formatDate(game.date)} 終了`;
+    statusText = `${formatGameDate(game.date)} 終了`;
   } else {
-    statusText = `${formatDate(game.date)} 予定`;
+    statusText = `${formatGameDate(game.date)} 予定`;
   }
 
   return (

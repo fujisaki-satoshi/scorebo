@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { SportIcon } from "@/app/_components/SportIcon";
 import { track } from "@/lib/analytics";
+import { formatGameDate, formatGameDateFull } from "@/lib/dates";
 import {
   currentInning,
   deleteGame,
@@ -28,13 +29,6 @@ type Modal = "share" | "edit" | "delete" | null;
 function teamShort(name: string): string {
   if (!name) return "—";
   return name.length > 5 ? name.slice(0, 5) + "…" : name;
-}
-
-function formatMonthDay(date: string): string {
-  if (!date) return "";
-  const [, m, d] = date.split("-");
-  if (!m || !d) return date;
-  return `${Number(m)}/${Number(d)}`;
 }
 
 export function GameView({ id }: { id: string }) {
@@ -272,7 +266,7 @@ export function GameView({ id }: { id: string }) {
           <SportIcon sport={game.sport} size={14} />
           <span>{meta.label}</span>
           <span>·</span>
-          <span>{formatMonthDay(game.date)}</span>
+          <span>{formatGameDate(game.date)}</span>
           {game.location && (
             <>
               <span>·</span>
@@ -665,7 +659,7 @@ function ShareModal({ game, onClose }: { game: Game; onClose: () => void }) {
           <div className="flex items-center gap-1.5 text-[11px] text-ink-sub">
             <SportIcon sport={game.sport} size={14} />
             <span>
-              {formatMonthDay(game.date)}
+              {formatGameDateFull(game.date)}
               {game.location ? ` | ${game.location}` : ""}
             </span>
           </div>
