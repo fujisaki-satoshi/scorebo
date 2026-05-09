@@ -26,7 +26,7 @@ export default function HelpPage() {
           </div>
         </div>
         <Link
-          href="/"
+          href="/games"
           className="inline-flex items-center gap-1 text-[12px] text-white/90"
         >
           <svg
@@ -42,7 +42,7 @@ export default function HelpPage() {
           >
             <path d="m15 18-6-6 6-6" />
           </svg>
-          ホームへ戻る
+          試合一覧へ戻る
         </Link>
       </header>
 
@@ -81,8 +81,8 @@ export default function HelpPage() {
 
         <Section title="使い方の流れ">
           <Step n={1} title="試合を作成する">
-            ホームの <Pill>＋ 試合を作成する</Pill>{" "}
-            ボタンから、競技・試合日・最大回数・対戦チームを入力します。先攻・後攻はチーム名の入力順で決まります。
+            <Pill>＋ 無料で試合を作成する</Pill>{" "}
+            ボタン(トップページまたは試合一覧画面)から、競技・試合日・最大回数・対戦チームを入力します。先攻・後攻はチーム名の入力順で決まります。
           </Step>
           <Step n={2} title="URLとQRコードを共有する">
             作成後のスコア画面で右上の <Pill>共有</Pill>{" "}
@@ -112,7 +112,7 @@ export default function HelpPage() {
           </Step>
         </Section>
 
-        <Section title="ホーム画面の使い方">
+        <Section title="試合一覧画面の使い方">
           <ul className="space-y-2 list-disc pl-5">
             <li>
               <strong className="text-ink">検索</strong>
@@ -153,10 +153,10 @@ export default function HelpPage() {
 
         <div className="mt-6 mb-4">
           <Link
-            href="/"
+            href="/games"
             className="block w-full rounded-2xl bg-brand py-3.5 text-center text-base font-bold text-white shadow-[0_4px_12px_rgba(26,122,53,0.3)] active:bg-brand-dark"
           >
-            ホームに戻る
+            試合一覧へ
           </Link>
         </div>
       </main>

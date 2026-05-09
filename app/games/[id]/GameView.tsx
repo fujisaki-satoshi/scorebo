@@ -87,10 +87,10 @@ export function GameView({ id }: { id: string }) {
           URLが正しいか確認するか、ホームに戻ってください。
         </div>
         <Link
-          href="/"
+          href="/games"
           className="rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white"
         >
-          ホームへ
+          試合一覧へ
         </Link>
       </div>
     );
@@ -165,7 +165,7 @@ export function GameView({ id }: { id: string }) {
     <>
       <header className="relative flex items-center gap-1.5 border-b border-line bg-card px-3.5 py-3">
         <Link
-          href="/"
+          href="/games"
           className="inline-flex items-center gap-0.5 px-1 py-1.5 text-sm font-medium text-brand"
         >
           <svg

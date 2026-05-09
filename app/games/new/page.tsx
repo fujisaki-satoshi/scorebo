@@ -70,7 +70,7 @@ export default function NewGamePage() {
     <>
       <header className="flex items-center gap-2.5 border-b border-line bg-card px-4 py-3.5">
         <Link
-          href="/"
+          href="/games"
           className="flex items-center gap-1 px-1 py-1 text-sm font-medium text-brand"
           aria-label="戻る"
         >
