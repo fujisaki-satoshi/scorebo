@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -102,9 +103,7 @@ function Hero() {
         <HeroMetaCheck>インストール不要</HeroMetaCheck>
       </div>
 
-      <div className="relative z-[1] mx-[-8px] mt-6 flex items-center justify-center rounded-2xl bg-white/[0.08] p-4">
-        <HeroIllustration />
-      </div>
+      <HeroVisual />
     </section>
   );
 }
@@ -130,87 +129,76 @@ function HeroMetaCheck({ children }: { children: React.ReactNode }) {
   );
 }
 
-function HeroIllustration() {
+function HeroVisual() {
   return (
-    <svg
-      viewBox="0 0 320 150"
-      className="h-[140px] w-full"
+    <div
+      className="relative z-[1] mx-[-8px] mt-7 -mb-1 h-[280px]"
+      aria-label="QRコード付きのシェアモーダルを中央に、両脇のスマホでもスコアが見られる様子"
       role="img"
-      aria-label="QRコードを介してチーム全員のスマホにスコアが共有されるイメージ"
     >
-      <g
-        stroke="rgba(255,255,255,0.35)"
-        strokeWidth="1.2"
-        strokeDasharray="3 3"
-        fill="none"
-        strokeLinecap="round"
+      <svg
+        viewBox="0 0 360 280"
+        preserveAspectRatio="none"
+        className="pointer-events-none absolute inset-0 z-[2] h-full w-full"
+        aria-hidden="true"
       >
-        <path d="M160 75 Q 105 45 60 55" />
-        <path d="M160 75 Q 105 105 60 115" />
-        <path d="M160 75 Q 215 45 260 55" />
-        <path d="M160 75 Q 215 105 260 115" />
-      </g>
-
-      <SmallPhone x={36} y={28} />
-      <SmallPhone x={36} y={88} />
-      <SmallPhone x={244} y={28} />
-      <SmallPhone x={244} y={88} />
-
-      <g transform="translate(132 18)">
-        <rect width="56" height="114" rx="9" fill="#ffffff" />
-        <rect
-          x="20"
-          y="5"
-          width="16"
-          height="3"
-          rx="1.5"
-          fill="#1a1a1a"
-          opacity="0.25"
-        />
-        <g transform="translate(11 14)">
-          <rect width="34" height="34" rx="2" fill="#1a1a1a" />
-          <rect x="3" y="3" width="8" height="8" fill="#ffffff" />
-          <rect x="5" y="5" width="4" height="4" fill="#1a1a1a" />
-          <rect x="23" y="3" width="8" height="8" fill="#ffffff" />
-          <rect x="25" y="5" width="4" height="4" fill="#1a1a1a" />
-          <rect x="3" y="23" width="8" height="8" fill="#ffffff" />
-          <rect x="5" y="25" width="4" height="4" fill="#1a1a1a" />
-          <rect x="13" y="13" width="3" height="3" fill="#ffffff" />
-          <rect x="18" y="14" width="3" height="3" fill="#ffffff" />
-          <rect x="14" y="19" width="3" height="3" fill="#ffffff" />
-          <rect x="20" y="22" width="3" height="3" fill="#ffffff" />
-          <rect x="22" y="17" width="3" height="3" fill="#ffffff" />
+        <g
+          stroke="rgba(255,255,255,0.25)"
+          strokeWidth="1.4"
+          fill="none"
+          strokeDasharray="3 3"
+          strokeLinecap="round"
+        >
+          <path d="M180 80 Q 100 100 60 140" />
+          <path d="M180 80 Q 260 100 300 140" />
         </g>
-        <rect x="9" y="56" width="38" height="3" rx="1.5" fill="#1a7a35" opacity="0.55" />
-        <rect x="9" y="62" width="26" height="3" rx="1.5" fill="#1a7a35" opacity="0.3" />
-        <rect x="9" y="78" width="38" height="14" rx="3.5" fill="#1a7a35" />
-        <rect x="14" y="83" width="28" height="4" rx="1.5" fill="#ffffff" />
-        <circle cx="28" cy="105" r="3" fill="#1a1a1a" opacity="0.2" />
-      </g>
-    </svg>
+      </svg>
+      <PhoneMockup
+        src="/landing/screen-score.png"
+        alt=""
+        className="absolute left-1.5 top-[38px] z-[1] h-[220px] w-[130px] -rotate-[9deg] opacity-80"
+      />
+      <PhoneMockup
+        src="/landing/screen-list.png"
+        alt=""
+        className="absolute right-1.5 top-[38px] z-[1] h-[220px] w-[130px] rotate-[9deg] opacity-80"
+      />
+      <PhoneMockup
+        src="/landing/screen-share.png"
+        alt="共有モーダルのプレビュー"
+        priority
+        className="absolute left-1/2 top-3 z-[3] h-[264px] w-[168px] -translate-x-1/2"
+      />
+    </div>
   );
 }
 
-function SmallPhone({ x, y }: { x: number; y: number }) {
+function PhoneMockup({
+  src,
+  alt,
+  className,
+  priority,
+}: {
+  src: string;
+  alt: string;
+  className: string;
+  priority?: boolean;
+}) {
   return (
-    <g transform={`translate(${x} ${y})`}>
-      <rect width="40" height="34" rx="4" fill="#ffffff" opacity="0.92" />
-      <rect x="4" y="5" width="20" height="2.4" rx="1.2" fill="#1a7a35" />
-      <rect x="4" y="11" width="32" height="1.8" rx="0.9" fill="#1a1a1a" opacity="0.18" />
-      <rect x="4" y="15" width="24" height="1.8" rx="0.9" fill="#1a1a1a" opacity="0.18" />
-      <rect x="4" y="22" width="32" height="8" rx="2" fill="#1a7a35" opacity="0.18" />
-      <text
-        x="20"
-        y="28"
-        fontSize="6"
-        fontWeight="800"
-        fontFamily="-apple-system, sans-serif"
-        textAnchor="middle"
-        fill="#1a7a35"
-      >
-        3 − 5
-      </text>
-    </g>
+    <div
+      className={`overflow-hidden rounded-[22px] bg-[#1a1a1a] p-1 shadow-[0_12px_32px_rgba(0,0,0,0.35)] ${className}`}
+    >
+      <div className="relative h-full w-full overflow-hidden rounded-[18px]">
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="170px"
+          priority={priority}
+          className="object-cover object-top"
+        />
+      </div>
+    </div>
   );
 }
 
@@ -371,6 +359,28 @@ function HowToUse() {
 }
 
 function ScreenStrip() {
+  const screens: Array<{ src: string; alt: string; label: string }> = [
+    {
+      src: "/landing/screen-create.png",
+      alt: "試合作成画面のスクリーンショット",
+      label: "試合を作成",
+    },
+    {
+      src: "/landing/screen-score.png",
+      alt: "スコア入力画面のスクリーンショット",
+      label: "スコア入力",
+    },
+    {
+      src: "/landing/screen-share.png",
+      alt: "QR共有モーダルのスクリーンショット",
+      label: "QR共有",
+    },
+    {
+      src: "/landing/screen-list.png",
+      alt: "試合一覧画面のスクリーンショット",
+      label: "試合一覧",
+    },
+  ];
   return (
     <SectionShell
       alt
@@ -385,247 +395,37 @@ function ScreenStrip() {
       sub="スマホ最適化された、シンプルなUIです。"
     >
       <div className="-mx-[22px] flex gap-2.5 overflow-x-auto px-[22px] pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <ScreenCardCreate />
-        <ScreenCardScore />
-        <ScreenCardShare />
-        <ScreenCardList />
+        {screens.map((s) => (
+          <ScreenCard key={s.src} {...s} />
+        ))}
       </div>
     </SectionShell>
   );
 }
 
-function ScreenFrame({
+function ScreenCard({
+  src,
+  alt,
   label,
-  children,
 }: {
+  src: string;
+  alt: string;
   label: string;
-  children: React.ReactNode;
 }) {
   return (
     <div className="flex shrink-0 flex-col items-stretch">
-      <div className="flex h-[290px] w-[140px] flex-col overflow-hidden rounded-[16px] border border-line bg-card shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
-        {children}
+      <div className="overflow-hidden rounded-[16px] border border-line bg-card shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+        <Image
+          src={src}
+          alt={alt}
+          width={140}
+          height={303}
+          sizes="140px"
+          className="block h-[303px] w-[140px] object-cover object-top"
+        />
       </div>
       <div className="mt-2 text-center text-[11px] font-semibold text-ink-sub">
         {label}
-      </div>
-    </div>
-  );
-}
-
-function ScreenCardCreate() {
-  return (
-    <ScreenFrame label="試合を作成">
-      <div className="bg-brand px-2.5 pt-2 pb-2.5 text-white">
-        <div className="text-[8px] font-bold tracking-[0.05em]">スコアボ</div>
-        <div className="mt-1 text-[9px] font-semibold opacity-90">試合を作成</div>
-      </div>
-      <div className="flex-1 px-2 py-2.5">
-        <div className="mb-1 text-[7.5px] text-ink-sub">競技</div>
-        <div className="mb-2 grid grid-cols-3 gap-1">
-          <div className="flex h-7 items-center justify-center rounded border border-brand bg-brand-light">
-            <SportIcon sport="baseball" size={14} />
-          </div>
-          <div className="flex h-7 items-center justify-center rounded border border-line">
-            <SportIcon sport="softball" size={14} />
-          </div>
-          <div className="flex h-7 items-center justify-center rounded border border-line">
-            <SportIcon sport="kickball" size={14} />
-          </div>
-        </div>
-        <div className="mb-1 text-[7.5px] text-ink-sub">先攻チーム</div>
-        <div className="mb-2 h-5 rounded border border-line bg-canvas" />
-        <div className="mb-1 text-[7.5px] text-ink-sub">後攻チーム</div>
-        <div className="mb-3 h-5 rounded border border-line bg-canvas" />
-        <div className="rounded-lg bg-brand py-1.5 text-center text-[8px] font-extrabold text-white">
-          試合を作成して共有する
-        </div>
-      </div>
-    </ScreenFrame>
-  );
-}
-
-function ScreenCardScore() {
-  return (
-    <ScreenFrame label="スコア入力">
-      <div className="bg-brand px-2.5 pt-2 pb-2.5 text-white">
-        <div className="flex items-center justify-between text-[7.5px]">
-          <span className="opacity-85">中野ベアーズ</span>
-          <span className="opacity-85">町田パイレーツ</span>
-        </div>
-        <div className="mt-1 flex items-center justify-center gap-2 text-[18px] font-extrabold tabular-nums">
-          <span>3</span>
-          <span className="text-[12px] opacity-70">−</span>
-          <span>5</span>
-        </div>
-        <div className="mt-1 text-center text-[7.5px] opacity-85">進行中 4回</div>
-      </div>
-      <div className="flex-1 px-2 py-2.5">
-        <div className="mb-2 grid grid-cols-7 gap-[1px] overflow-hidden rounded border border-line text-center">
-          {Array.from({ length: 7 }).map((_, i) => {
-            const isCurrent = i === 3;
-            return (
-              <div
-                key={i}
-                className={`text-[7px] leading-tight ${
-                  isCurrent ? "bg-accent-soft" : "bg-card"
-                }`}
-              >
-                <div className="border-b border-line py-[1px] text-ink-sub">
-                  {i + 1}
-                </div>
-                <div className="py-[1px]">{i < 3 ? "1" : ""}</div>
-                <div className="border-t border-line py-[1px]">
-                  {i < 3 ? "2" : ""}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="mb-1 text-[7.5px] font-semibold text-ink">4回 を入力</div>
-        <div className="grid grid-cols-2 gap-1.5">
-          {[0, 1].map((c) => (
-            <div
-              key={c}
-              className="flex items-center justify-between rounded border border-line bg-canvas px-1.5 py-1"
-            >
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[8px] font-bold text-white">
-                −
-              </span>
-              <span className="text-[10px] font-extrabold tabular-nums">0</span>
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[8px] font-bold text-white">
-                ＋
-              </span>
-            </div>
-          ))}
-        </div>
-        <div className="mt-2 rounded-lg bg-brand py-1.5 text-center text-[8px] font-extrabold text-white">
-          4回を保存する
-        </div>
-      </div>
-    </ScreenFrame>
-  );
-}
-
-function ScreenCardShare() {
-  return (
-    <ScreenFrame label="QR共有">
-      <div className="bg-brand px-2.5 pt-2 pb-2.5 text-center text-white">
-        <div className="text-[8px] font-bold tracking-[0.05em]">スコアボ</div>
-        <div className="mt-1 text-[9px] font-semibold opacity-90">試合を共有</div>
-      </div>
-      <div className="flex flex-1 flex-col items-center px-2 py-2.5">
-        <div className="text-[7.5px] text-ink-sub">中野ベアーズ vs 町田パイレーツ</div>
-        <div className="mt-1 mb-2 flex h-[70px] w-[70px] items-center justify-center rounded border border-line bg-card">
-          <QrSquare />
-        </div>
-        <div className="mb-2 h-3 w-full rounded border border-line bg-canvas" />
-        <div className="w-full rounded-lg bg-line-green py-1.5 text-center text-[8px] font-extrabold text-white">
-          みんなに送る
-        </div>
-      </div>
-    </ScreenFrame>
-  );
-}
-
-function QrSquare() {
-  return (
-    <svg viewBox="0 0 36 36" width="58" height="58" aria-hidden="true">
-      <rect width="36" height="36" fill="#ffffff" />
-      <g fill="#1a1a1a">
-        <rect x="3" y="3" width="9" height="9" />
-        <rect x="24" y="3" width="9" height="9" />
-        <rect x="3" y="24" width="9" height="9" />
-      </g>
-      <g fill="#ffffff">
-        <rect x="5" y="5" width="5" height="5" />
-        <rect x="26" y="5" width="5" height="5" />
-        <rect x="5" y="26" width="5" height="5" />
-      </g>
-      <g fill="#1a1a1a">
-        <rect x="6" y="6" width="3" height="3" />
-        <rect x="27" y="6" width="3" height="3" />
-        <rect x="6" y="27" width="3" height="3" />
-        <rect x="14" y="3" width="2" height="2" />
-        <rect x="18" y="5" width="2" height="2" />
-        <rect x="20" y="3" width="2" height="2" />
-        <rect x="14" y="9" width="2" height="2" />
-        <rect x="14" y="14" width="2" height="2" />
-        <rect x="17" y="14" width="2" height="2" />
-        <rect x="20" y="14" width="2" height="2" />
-        <rect x="14" y="18" width="2" height="2" />
-        <rect x="20" y="18" width="2" height="2" />
-        <rect x="23" y="18" width="2" height="2" />
-        <rect x="26" y="14" width="2" height="2" />
-        <rect x="29" y="17" width="2" height="2" />
-        <rect x="14" y="22" width="2" height="2" />
-        <rect x="20" y="22" width="2" height="2" />
-        <rect x="26" y="22" width="2" height="2" />
-        <rect x="29" y="25" width="2" height="2" />
-        <rect x="17" y="26" width="2" height="2" />
-        <rect x="23" y="29" width="2" height="2" />
-        <rect x="14" y="29" width="2" height="2" />
-        <rect x="26" y="29" width="2" height="2" />
-        <rect x="29" y="29" width="2" height="2" />
-      </g>
-    </svg>
-  );
-}
-
-function ScreenCardList() {
-  return (
-    <ScreenFrame label="試合一覧">
-      <div className="bg-brand px-2.5 pt-2 pb-2.5 text-white">
-        <div className="text-[8px] font-bold tracking-[0.05em]">スコアボ</div>
-        <div className="mt-1 mb-1 h-3 rounded bg-white" />
-        <div className="flex gap-1">
-          <span className="rounded-full bg-white/95 px-1.5 py-[1px] text-[6.5px] font-semibold text-brand-dark">
-            すべて
-          </span>
-          <span className="rounded-full bg-white/20 px-1.5 py-[1px] text-[6.5px]">
-            野球
-          </span>
-          <span className="rounded-full bg-white/20 px-1.5 py-[1px] text-[6.5px]">
-            ソフト
-          </span>
-        </div>
-      </div>
-      <div className="flex-1 px-2 py-2 text-[7.5px]">
-        <div className="mb-1 text-[7px] font-semibold text-live">● 進行中</div>
-        <MiniGameCard live top="3" bottom="5" />
-        <div className="mt-2 mb-1 text-[7px] font-semibold text-ink-sub">最近</div>
-        <MiniGameCard top="2" bottom="2" />
-        <MiniGameCard top="6" bottom="1" />
-      </div>
-    </ScreenFrame>
-  );
-}
-
-function MiniGameCard({
-  live,
-  top,
-  bottom,
-}: {
-  live?: boolean;
-  top: string;
-  bottom: string;
-}) {
-  return (
-    <div className="mb-1 rounded border border-line bg-card px-1.5 py-1">
-      <div className="flex items-center justify-between text-[6.5px]">
-        <span className="rounded-full bg-brand-light px-1 text-brand-dark">
-          野球
-        </span>
-        <span className={live ? "text-live" : "text-ink-sub"}>
-          {live ? "進行中" : "終了"}
-        </span>
-      </div>
-      <div className="mt-0.5 flex items-center justify-between">
-        <span>中野</span>
-        <span className="font-extrabold tabular-nums text-brand">
-          {top} − {bottom}
-        </span>
-        <span>町田</span>
       </div>
     </div>
   );
