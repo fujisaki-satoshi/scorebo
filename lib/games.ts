@@ -34,6 +34,7 @@ function fromDoc(d: QueryDocumentSnapshot<DocumentData>): Game {
     max_innings: data.max_innings,
     status: data.status,
     created_at: data.created_at,
+    updated_at: data.updated_at ?? null,
   };
 }
 

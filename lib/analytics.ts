@@ -10,6 +10,7 @@ type EventMap = {
   qr_share_opened: { sport: Sport };
   qr_share_line: { sport: Sport };
   qr_share_copy: { sport: Sport };
+  qr_share_native: { sport: Sport; with_image: boolean };
 };
 
 export function track<K extends keyof EventMap>(name: K, props: EventMap[K]) {

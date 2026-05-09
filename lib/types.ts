@@ -21,6 +21,7 @@ export type Game = {
   max_innings: number;
   status: GameStatus;
   created_at: Timestamp;
+  updated_at: Timestamp | null;
 };
 
 export type GameDraft = {
