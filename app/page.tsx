@@ -243,6 +243,7 @@ function HowToUse() {
     body: string;
     src: string;
     alt: string;
+    video?: string;
   }> = [
     {
       n: 1,
@@ -250,6 +251,7 @@ function HowToUse() {
       body: "競技・試合日・チーム名を入力するだけ。所要時間 約30秒。",
       src: "/landing/screen-create.png",
       alt: "試合作成画面のスクリーンショット",
+      video: "/demo/demo-1-create",
     },
     {
       n: 2,
@@ -257,6 +259,7 @@ function HowToUse() {
       body: "右上の「共有」ボタンから出るQRを、応援団・家族・チームメイトに見せるだけで全員のスマホで観戦開始。",
       src: "/landing/screen-share.png",
       alt: "QR共有モーダルのスクリーンショット",
+      video: "/demo/demo-3-share",
     },
     {
       n: 3,
@@ -264,6 +267,7 @@ function HowToUse() {
       body: "±ボタンで得点を入れて保存。観ている全員のスマホに即反映されます。",
       src: "/landing/screen-score.png",
       alt: "スコア入力画面のスクリーンショット",
+      video: "/demo/demo-2-score",
     },
     {
       n: 4,
@@ -305,7 +309,7 @@ function HowToUse() {
             </div>
             <div className="grid grid-cols-[1fr_110px] items-start gap-3.5 pl-11">
               <p className="text-[13px] leading-[1.75] text-ink-sub">{s.body}</p>
-              <StepPhone src={s.src} alt={s.alt} />
+              <StepPhone src={s.src} alt={s.alt} video={s.video} />
             </div>
           </div>
         ))}
@@ -314,17 +318,33 @@ function HowToUse() {
   );
 }
 
-function StepPhone({ src, alt }: { src: string; alt: string }) {
+function StepPhone({ src, alt, video }: { src: string; alt: string; video?: string }) {
   return (
     <div className="overflow-hidden rounded-[14px] bg-[#1a1a1a] p-[3px] shadow-[0_6px_16px_rgba(0,0,0,0.15)]">
       <div className="relative aspect-[390/844] overflow-hidden rounded-[11px]">
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          sizes="110px"
-          className="object-cover object-top"
-        />
+        {video ? (
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="none"
+            poster={src}
+            aria-label={alt}
+            className="absolute inset-0 h-full w-full object-cover object-top"
+          >
+            <source src={`${video}.webm`} type="video/webm" />
+            <source src={`${video}.mp4`} type="video/mp4" />
+          </video>
+        ) : (
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            sizes="110px"
+            className="object-cover object-top"
+          />
+        )}
       </div>
     </div>
   );
