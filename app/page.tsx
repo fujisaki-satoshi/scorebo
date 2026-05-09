@@ -3,17 +3,16 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 import { BrandMark } from "@/app/_components/BrandMark";
-import { SportIcon } from "@/app/_components/SportIcon";
 
 const SITE_DESC =
-  "野球・ソフトボール・キックベースのスコアをスマホで記録し、QRコードを見せるだけでチーム全員にリアルタイム共有できる無料Webアプリ。アカウント登録不要・完全無料・インストール不要。";
+  "野球・ソフトボール・キックベースのスコアをスマホで記録し、QRコードを見せるだけで応援団・家族・チームメイトみんなにリアルタイム共有できる無料Webアプリ。アカウント登録不要・完全無料・インストール不要。";
 
 export const metadata: Metadata = {
-  title: "スコアボ — QRひとつで試合スコアをチーム全員に共有",
+  title: "スコアボ — QRひとつで試合スコアをみんなにリアルタイム共有",
   description: SITE_DESC,
   alternates: { canonical: "/" },
   openGraph: {
-    title: "スコアボ — QRひとつで試合スコアをチーム全員に共有",
+    title: "スコアボ — QRひとつで試合スコアをみんなにリアルタイム共有",
     description: SITE_DESC,
     url: "/",
     siteName: "スコアボ",
@@ -22,7 +21,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "スコアボ — QRひとつで試合スコアをチーム全員に共有",
+    title: "スコアボ — QRひとつで試合スコアをみんなにリアルタイム共有",
     description: SITE_DESC,
   },
 };
@@ -31,9 +30,7 @@ export default function LandingPage() {
   return (
     <>
       <Hero />
-      <UseCases />
       <HowToUse />
-      <ScreenStrip />
       <Features />
       <Faq />
       <FinalCta />
@@ -71,8 +68,9 @@ function Hero() {
         <br />
         試合のスコアを
         <br />
+        みんなに
         <span className="inline-block rounded bg-accent px-1.5 text-[#1a1a1a]">
-          チーム全員に共有
+          リアルタイム共有
         </span>
       </h1>
 
@@ -132,12 +130,12 @@ function HeroMetaCheck({ children }: { children: React.ReactNode }) {
 function HeroVisual() {
   return (
     <div
-      className="relative z-[1] mx-[-8px] mt-7 -mb-1 h-[280px]"
+      className="relative z-[1] mx-[-8px] mt-7 -mb-1 h-[324px]"
       aria-label="QRコード付きのシェアモーダルを中央に、両脇のスマホでもスコアが見られる様子"
       role="img"
     >
       <svg
-        viewBox="0 0 360 280"
+        viewBox="0 0 360 324"
         preserveAspectRatio="none"
         className="pointer-events-none absolute inset-0 z-[2] h-full w-full"
         aria-hidden="true"
@@ -149,25 +147,25 @@ function HeroVisual() {
           strokeDasharray="3 3"
           strokeLinecap="round"
         >
-          <path d="M180 80 Q 100 100 60 140" />
-          <path d="M180 80 Q 260 100 300 140" />
+          <path d="M180 90 Q 100 110 56 156" />
+          <path d="M180 90 Q 260 110 304 156" />
         </g>
       </svg>
       <PhoneMockup
         src="/landing/screen-score.png"
         alt=""
-        className="absolute left-1.5 top-[38px] z-[1] h-[220px] w-[130px] -rotate-[9deg] opacity-80"
+        className="absolute left-1 top-[52px] z-[1] h-[238px] w-[110px] -rotate-[9deg] opacity-80"
       />
       <PhoneMockup
         src="/landing/screen-list.png"
         alt=""
-        className="absolute right-1.5 top-[38px] z-[1] h-[220px] w-[130px] rotate-[9deg] opacity-80"
+        className="absolute right-1 top-[52px] z-[1] h-[238px] w-[110px] rotate-[9deg] opacity-80"
       />
       <PhoneMockup
         src="/landing/screen-share.png"
         alt="共有モーダルのプレビュー"
         priority
-        className="absolute left-1/2 top-3 z-[3] h-[264px] w-[168px] -translate-x-1/2"
+        className="absolute left-1/2 top-3 z-[3] h-[303px] w-[140px] -translate-x-1/2"
       />
     </div>
   );
@@ -238,83 +236,41 @@ function SectionShell({
   );
 }
 
-function UseCases() {
-  return (
-    <SectionShell
-      alt
-      eyebrow="こんな場面で"
-      title="3つの競技で使えます"
-      sub="標準回数や雰囲気に合わせて、競技ごとに最適化されています。"
-    >
-      <div className="grid gap-3">
-        <UseCase
-          sport="baseball"
-          title="野球"
-          body="休日の試合を、応援団・来られなかったご家族にもリアルタイム共有。最大9回+延長対応。"
-        />
-        <UseCase
-          sport="softball"
-          title="ソフトボール"
-          body="会社・地域・PTAのソフトを、チームLINEにQRひとつで共有。標準7回+コールドゲーム対応。"
-        />
-        <UseCase
-          sport="kickball"
-          title="キックベース"
-          body="学校・学童・PTAのキックベースを、保護者みんなで観戦。標準5回・ライト運用に最適。"
-        />
-      </div>
-    </SectionShell>
-  );
-}
-
-function UseCase({
-  sport,
-  title,
-  body,
-}: {
-  sport: "baseball" | "softball" | "kickball";
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="grid grid-cols-[44px_1fr] items-start gap-3 rounded-2xl border border-line bg-card p-4">
-      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-light">
-        <SportIcon sport={sport} size={28} />
-      </div>
-      <div>
-        <h3 className="mb-1 text-[15px] font-bold text-ink">{title}</h3>
-        <p className="text-[12.5px] leading-[1.7] text-ink-sub">{body}</p>
-      </div>
-    </div>
-  );
-}
-
 function HowToUse() {
-  const steps = [
+  const steps: Array<{
+    n: number;
+    title: string;
+    body: string;
+    src: string;
+    alt: string;
+  }> = [
     {
       n: 1,
       title: "試合を作成",
       body: "競技・試合日・チーム名を入力するだけ。所要時間 約30秒。",
+      src: "/landing/screen-create.png",
+      alt: "試合作成画面のスクリーンショット",
     },
     {
       n: 2,
-      title: "QRコードを表示",
-      body: "右上の「共有」ボタンから、QRと試合URLが瞬時に出ます。",
+      title: "QRコードで共有",
+      body: "右上の「共有」ボタンから出るQRを、応援団・家族・チームメイトに見せるだけで全員のスマホで観戦開始。",
+      src: "/landing/screen-share.png",
+      alt: "QR共有モーダルのスクリーンショット",
     },
     {
       n: 3,
-      title: "みんながQRを読む",
-      body: "応援に来た人・家族・チームメイトがQRを読むだけで、全員のスマホでスコアが見られます。",
+      title: "得点をリアルタイム入力",
+      body: "±ボタンで得点を入れて保存。観ている全員のスマホに即反映されます。",
+      src: "/landing/screen-score.png",
+      alt: "スコア入力画面のスクリーンショット",
     },
     {
       n: 4,
-      title: "得点をリアルタイム入力",
-      body: "±ボタンで得点を入れて保存。観ている全員のスマホに即反映されます。",
-    },
-    {
-      n: 5,
-      title: "試合終了でURLを記録に",
-      body: "試合が終わったらワンタップで終了。同じURLで結果がいつまでも残ります。",
+      title: "URLでずっと残る",
+      body: "試合終了後も同じURLで結果を振り返れます。過去の試合は試合一覧から。",
+      src: "/landing/screen-list.png",
+      alt: "試合一覧画面のスクリーンショット",
     },
   ];
   return (
@@ -323,33 +279,33 @@ function HowToUse() {
       eyebrow="30秒で分かる"
       title={
         <>
-          5ステップで
+          4ステップで
           <br />
           使えます
         </>
       }
-      sub="試合作成から共有・スコア入力までスマホで完結。"
+      sub="作成 → 共有 → 入力 → 振り返り。スマホで完結。"
     >
       <div>
         {steps.map((s, i) => (
-          <div
-            key={s.n}
-            className="relative grid grid-cols-[32px_1fr] gap-3.5 pb-5 last:pb-0"
-          >
+          <div key={s.n} className="relative pb-7 last:pb-0">
             {i < steps.length - 1 && (
               <span
                 aria-hidden
-                className="absolute left-[15px] top-9 bottom-1 w-0.5 bg-brand-light"
+                className="absolute left-[14px] top-9 bottom-1 w-0.5 bg-brand-light"
               />
             )}
-            <div className="relative z-[1] flex h-8 w-8 items-center justify-center rounded-full bg-brand text-[14px] font-extrabold text-white">
-              {s.n}
-            </div>
-            <div>
-              <h4 className="mb-1 text-[15px] font-bold leading-[1.4] text-ink">
+            <div className="mb-2.5 flex items-center gap-3">
+              <div className="relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-[14px] font-extrabold text-white">
+                {s.n}
+              </div>
+              <h4 className="text-base font-bold leading-[1.4] text-ink">
                 {s.title}
               </h4>
-              <p className="text-[12.5px] leading-[1.7] text-ink-sub">{s.body}</p>
+            </div>
+            <div className="grid grid-cols-[1fr_110px] items-start gap-3.5 pl-11">
+              <p className="text-[13px] leading-[1.75] text-ink-sub">{s.body}</p>
+              <StepPhone src={s.src} alt={s.alt} />
             </div>
           </div>
         ))}
@@ -358,74 +314,17 @@ function HowToUse() {
   );
 }
 
-function ScreenStrip() {
-  const screens: Array<{ src: string; alt: string; label: string }> = [
-    {
-      src: "/landing/screen-create.png",
-      alt: "試合作成画面のスクリーンショット",
-      label: "試合を作成",
-    },
-    {
-      src: "/landing/screen-score.png",
-      alt: "スコア入力画面のスクリーンショット",
-      label: "スコア入力",
-    },
-    {
-      src: "/landing/screen-share.png",
-      alt: "QR共有モーダルのスクリーンショット",
-      label: "QR共有",
-    },
-    {
-      src: "/landing/screen-list.png",
-      alt: "試合一覧画面のスクリーンショット",
-      label: "試合一覧",
-    },
-  ];
+function StepPhone({ src, alt }: { src: string; alt: string }) {
   return (
-    <SectionShell
-      alt
-      eyebrow="画面イメージ"
-      title={
-        <>
-          こんな画面で
-          <br />
-          使えます
-        </>
-      }
-      sub="スマホ最適化された、シンプルなUIです。"
-    >
-      <div className="-mx-[22px] flex gap-2.5 overflow-x-auto px-[22px] pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {screens.map((s) => (
-          <ScreenCard key={s.src} {...s} />
-        ))}
-      </div>
-    </SectionShell>
-  );
-}
-
-function ScreenCard({
-  src,
-  alt,
-  label,
-}: {
-  src: string;
-  alt: string;
-  label: string;
-}) {
-  return (
-    <div className="flex shrink-0 flex-col items-stretch">
-      <div className="overflow-hidden rounded-[16px] border border-line bg-card shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+    <div className="overflow-hidden rounded-[14px] bg-[#1a1a1a] p-[3px] shadow-[0_6px_16px_rgba(0,0,0,0.15)]">
+      <div className="relative aspect-[390/844] overflow-hidden rounded-[11px]">
         <Image
           src={src}
           alt={alt}
-          width={140}
-          height={303}
-          sizes="140px"
-          className="block h-[303px] w-[140px] object-cover object-top"
+          fill
+          sizes="110px"
+          className="object-cover object-top"
         />
-      </div>
-      <div className="mt-2 text-center text-[11px] font-semibold text-ink-sub">
-        {label}
       </div>
     </div>
   );

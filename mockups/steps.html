@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スコアボ ステップ統合案</title>
+<style>
+  :root {
+    --brand: #1a7a35;
+    --brand-dark: #145e29;
+    --brand-light: #e8f5ed;
+    --bg: #f5f7f5;
+    --card: #ffffff;
+    --text: #1c1c1c;
+    --text-sub: #666;
+    --border: #e2e6e2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #ddd;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  .preview-wrap {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(390px, 1fr));
+    gap: 24px;
+    padding: 24px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .preview-label {
+    font-size: 13px; font-weight: 700; color: #333;
+    margin-bottom: 8px; text-align: center;
+  }
+  .device {
+    width: 390px; max-width: 100%;
+    background: var(--bg);
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    margin: 0 auto;
+  }
+  .lp-section { padding: 36px 22px; background: var(--bg); }
+  .lp-section.alt { background: #fff; }
+  .section-eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+    color: var(--brand); margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: 22px; font-weight: 800; line-height: 1.4;
+    margin-bottom: 8px; color: var(--text);
+  }
+  .section-sub {
+    font-size: 13px; line-height: 1.7; color: var(--text-sub);
+    margin-bottom: 22px;
+  }
+  .phone-frame {
+    background: #1a1a1a;
+    border-radius: 14px;
+    padding: 3px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  }
+  .phone-frame > div {
+    border-radius: 11px;
+    overflow: hidden;
+  }
+  .phone-frame img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 390 / 844;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  /* === Variant A — text left, small phone right === */
+  .step-A {
+    position: relative;
+    display: grid;
+    grid-template-columns: 32px 1fr 96px;
+    gap: 14px;
+    padding-bottom: 28px;
+    align-items: start;
+  }
+  .step-A:last-child { padding-bottom: 0; }
+  .step-A .num {
+    width: 32px; height: 32px;
+    background: var(--brand);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+    z-index: 1;
+  }
+  .step-A:not(:last-child) .num::after {
+    content: "";
+    position: absolute;
+    left: 15px; top: 36px; bottom: 4px;
+    width: 2px;
+    background: var(--brand-light);
+    z-index: 0;
+  }
+  .step-A .body h4 {
+    font-size: 15px; font-weight: 700; margin-bottom: 4px;
+  }
+  .step-A .body p {
+    font-size: 12.5px; line-height: 1.7; color: var(--text-sub);
+  }
+  .step-A .phone-frame { width: 96px; }
+
+  /* === Variant B — number+title row, body+phone below === */
+  .step-B {
+    position: relative;
+    padding-bottom: 28px;
+  }
+  .step-B:last-child { padding-bottom: 0; }
+  .step-B .head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 10px;
+  }
+  .step-B .num {
+    width: 30px; height: 30px;
+    background: var(--brand);
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 13px;
+    flex-shrink: 0;
+  }
+  .step-B .head h4 {
+    font-size: 16px; font-weight: 700;
+  }
+  .step-B .row {
+    display: grid;
+    grid-template-columns: 1fr 110px;
+    gap: 14px;
+    align-items: start;
+  }
+  .step-B .row p {
+    font-size: 13px; line-height: 1.75; color: var(--text-sub);
+  }
+  .step-B .phone-frame { width: 110px; }
+  .step-B:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 14px; top: 38px; bottom: 8px;
+    width: 2px;
+    background: var(--brand-light);
+  }
+
+  /* === Variant C — image first (compact), text below; 2-col grid on tablet === */
+  .step-C {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    gap: 14px;
+    align-items: center;
+  }
+  .step-C .phone-frame { width: 84px; }
+  .step-C .body { position: relative; }
+  .step-C .num-pill {
+    display: inline-flex;
+    align-items: center;
+    background: var(--brand-light);
+    color: var(--brand-dark);
+    border-radius: 99px;
+    padding: 2px 8px;
+    font-size: 10px; font-weight: 800;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .step-C h4 {
+    font-size: 15px; font-weight: 700; margin-bottom: 4px;
+  }
+  .step-C p {
+    font-size: 12px; line-height: 1.6; color: var(--text-sub);
+  }
+</style>
+</head>
+<body>
+  <div class="preview-wrap">
+
+    <!-- Variant A -->
+    <div>
+      <div class="preview-label">A: 番号 + テキスト + 右に小型 phone (連結線あり)</div>
+      <div class="device">
+        <section class="lp-section">
+          <div class="section-eyebrow">30秒で分かる</div>
+          <h2 class="section-title">4ステップで<br>使えます</h2>
+          <p class="section-sub">作成→共有→入力→振り返り。スマホで完結。</p>
+          <div>
+            <div class="step-A">
+              <div class="num">1</div>
+              <div class="body">
+                <h4>試合を作成</h4>
+                <p>競技・試合日・チーム名を入力するだけ。所要時間 約30秒。</p>
+              </div>
+              <div class="phone-frame"><div><img src="../public/landing/screen-create.png" alt=""></div></div>
+            </div>
+            <div class="step-A">
+              <div class="num">2</div>
+              <div class="body">
+                <h4>QRコードで共有</h4>
+                <p>右上の「共有」ボタンから出るQRを、応援団・家族・チームメイトに見せるだけで全員観戦開始。</p>
+              </div>
+              <div class="phone-frame"><div><img src="../public/landing/screen-share.png" alt=""></div></div>
+            </div>
+            <div class="step-A">
+              <div class="num">3</div>
+              <div class="body">
+                <h4>得点をリアルタイム入力</h4>
+                <p>±ボタンで得点を入れて保存。観ている全員のスマホに即反映されます。</p>
+              </div>
+              <div class="phone-frame"><div><img src="../public/landing/screen-score.png" alt=""></div></div>
+            </div>
+            <div class="step-A">
+              <div class="num">4</div>
+              <div class="body">
+                <h4>URLでずっと残る</h4>
+                <p>試合終了後も同じURLで結果を振り返れます。過去の試合は試合一覧から。</p>
+              </div>
+              <div class="phone-frame"><div><img src="../public/landing/screen-list.png" alt=""></div></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Variant B -->
+    <div>
+      <div class="preview-label">B: 番号+タイトル(横一列) → 本文+大きめ phone(2カラム)</div>
+      <div class="device">
+        <section class="lp-section">
+          <div class="section-eyebrow">30秒で分かる</div>
+          <h2 class="section-title">4ステップで<br>使えます</h2>
+          <p class="section-sub">作成→共有→入力→振り返り。スマホで完結。</p>
+          <div>
+            <div class="step-B">
+              <div class="head"><div class="num">1</div><h4>試合を作成</h4></div>
+              <div class="row">
+                <p>競技・試合日・チーム名を入力するだけ。所要時間 約30秒。</p>
+                <div class="phone-frame"><div><img src="../public/landing/screen-create.png" alt=""></div></div>
+              </div>
+            </div>
+            <div class="step-B">
+              <div class="head"><div class="num">2</div><h4>QRコードで共有</h4></div>
+              <div class="row">
+                <p>右上の「共有」ボタンから出るQRを、応援団・家族・チームメイトに見せるだけで全員のスマホで観戦開始。</p>
+                <div class="phone-frame"><div><img src="../public/landing/screen-share.png" alt=""></div></div>
+              </div>
+            </div>
+            <div class="step-B">
+              <div class="head"><div class="num">3</div><h4>得点をリアルタイム入力</h4></div>
+              <div class="row">
+                <p>±ボタンで得点を入れて保存。観ている全員のスマホに即反映されます。</p>
+                <div class="phone-frame"><div><img src="../public/landing/screen-score.png" alt=""></div></div>
+              </div>
+            </div>
+            <div class="step-B">
+              <div class="head"><div class="num">4</div><h4>URLでずっと残る</h4></div>
+              <div class="row">
+                <p>試合終了後も同じURLで結果を振り返れます。過去の試合は試合一覧から。</p>
+                <div class="phone-frame"><div><img src="../public/landing/screen-list.png" alt=""></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Variant C -->
+    <div>
+      <div class="preview-label">C: カード型(コンパクト) — 小型 phone + 番号pill + タイトル + 本文</div>
+      <div class="device">
+        <section class="lp-section">
+          <div class="section-eyebrow">30秒で分かる</div>
+          <h2 class="section-title">4ステップで<br>使えます</h2>
+          <p class="section-sub">作成→共有→入力→振り返り。スマホで完結。</p>
+          <div>
+            <div class="step-C">
+              <div class="phone-frame"><div><img src="../public/landing/screen-create.png" alt=""></div></div>
+              <div class="body">
+                <span class="num-pill">STEP 1</span>
+                <h4>試合を作成</h4>
+                <p>競技・試合日・チーム名を入力するだけ。約30秒。</p>
+              </div>
+            </div>
+            <div class="step-C">
+              <div class="phone-frame"><div><img src="../public/landing/screen-share.png" alt=""></div></div>
+              <div class="body">
+                <span class="num-pill">STEP 2</span>
+                <h4>QRコードで共有</h4>
+                <p>「共有」ボタンから出るQRを応援団・家族に見せて全員観戦開始。</p>
+              </div>
+            </div>
+            <div class="step-C">
+              <div class="phone-frame"><div><img src="../public/landing/screen-score.png" alt=""></div></div>
+              <div class="body">
+                <span class="num-pill">STEP 3</span>
+                <h4>得点をリアルタイム入力</h4>
+                <p>±ボタンで保存。全員のスマホに即反映されます。</p>
+              </div>
+            </div>
+            <div class="step-C">
+              <div class="phone-frame"><div><img src="../public/landing/screen-list.png" alt=""></div></div>
+              <div class="body">
+                <span class="num-pill">STEP 4</span>
+                <h4>URLでずっと残る</h4>
+                <p>同じURLで結果をいつでも振り返り。過去の試合は一覧から。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
