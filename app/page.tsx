@@ -67,20 +67,20 @@ function Hero() {
       </div>
 
       <h1 className="relative z-[1] mb-4 text-[28px] font-extrabold leading-[1.35] tracking-[0.01em]">
-        得点板がない
+        家族も、ベンチ外も、
         <br />
-        グラウンドでも、
-        <br />
-        みんなで
         <span className="inline-block rounded bg-accent px-1.5 text-[#1a1a1a]">
-          観戦
+          みんなで
         </span>
+        リアルタイムに
+        <br />
+        試合を追える。
       </h1>
 
       <p className="relative z-[1] mb-6 text-[14px] leading-[1.7] opacity-95">
         草野球・ソフトボールの試合をスマホ1台で記録。
         <br />
-        QRを見せるだけで保護者・観客も
+        QRを見せるだけで家族・観客も
         <br />
         リアルタイムで見られます。
       </p>
@@ -102,14 +102,14 @@ function Hero() {
           href="/games/sample"
           className="text-[13px] text-white/90 underline underline-offset-[3px]"
         >
-          サンプルを見る →
+          観戦体験してみる →
         </Link>
       </div>
 
       <div className="relative z-[1] mt-[22px] flex items-center justify-center gap-3.5 text-[11px] opacity-90">
         <HeroMetaCheck>アカウント不要</HeroMetaCheck>
         <HeroMetaCheck>完全無料</HeroMetaCheck>
-        <HeroMetaCheck>タブレットで得点板に</HeroMetaCheck>
+        <HeroMetaCheck>インストール不要</HeroMetaCheck>
       </div>
 
       <HeroVisual />
