@@ -89,7 +89,7 @@ function Hero() {
         href="/games/new"
         className="relative z-[1] mb-2.5 block w-full rounded-2xl bg-white py-4 text-center text-base font-extrabold text-brand-dark shadow-[0_4px_16px_rgba(0,0,0,0.18)] active:bg-white/90"
       >
-        ＋ 無料で試合を作成する
+        ＋ 今日の試合で試してみる
       </Link>
       <div className="relative z-[1] flex justify-center gap-5">
         <a
@@ -581,7 +581,7 @@ function FinalCta() {
         href="/games/new"
         className="block w-full rounded-2xl bg-white py-4 text-center text-base font-extrabold text-brand-dark shadow-[0_4px_16px_rgba(0,0,0,0.18)] active:bg-white/90"
       >
-        ＋ 無料で試合を作成する
+        ＋ 今日の試合で試してみる
       </Link>
     </section>
   );
