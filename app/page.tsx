@@ -314,8 +314,8 @@ function HowToUse() {
                 {s.title}
               </h4>
             </div>
-            <div className="grid grid-cols-[1fr_110px] items-start gap-3.5 pl-11">
-              <p className="text-[13px] leading-[1.75] text-ink-sub">{s.body}</p>
+            <div className="pl-11">
+              <p className="mb-3 text-[13px] leading-[1.75] text-ink-sub">{s.body}</p>
               <StepPhone src={s.src} alt={s.alt} />
             </div>
           </div>
@@ -327,13 +327,13 @@ function HowToUse() {
 
 function StepPhone({ src, alt }: { src: string; alt: string }) {
   return (
-    <div className="overflow-hidden rounded-[14px] bg-[#1a1a1a] p-[3px] shadow-[0_6px_16px_rgba(0,0,0,0.15)]">
+    <div className="w-[160px] overflow-hidden rounded-[14px] bg-[#1a1a1a] p-[3px] shadow-[0_6px_16px_rgba(0,0,0,0.15)]">
       <div className="relative aspect-[390/844] overflow-hidden rounded-[11px]">
         <Image
           src={src}
           alt={alt}
           fill
-          sizes="110px"
+          sizes="160px"
           className="object-cover object-top"
         />
       </div>
