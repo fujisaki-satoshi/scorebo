@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { SportIcon } from "@/app/_components/SportIcon";
 import { track } from "@/lib/analytics";
+import { useAnonymousAuth } from "@/lib/auth";
 import { createGame } from "@/lib/games";
 import { checkCreateRateLimit, RateLimitError, recordCreate } from "@/lib/rate-limit";
 import { SPORT_META, SPORT_ORDER } from "@/lib/sports";
@@ -20,6 +21,7 @@ function todayISO() {
 
 export default function NewGamePage() {
   const router = useRouter();
+  const authUser = useAnonymousAuth();
   const [sport, setSport] = useState<Sport>("baseball");
   const [date, setDate] = useState(todayISO());
   const [maxInnings, setMaxInnings] = useState(SPORT_META.baseball.defaultMaxInnings);
@@ -54,7 +56,7 @@ export default function NewGamePage() {
         location: location.trim(),
         team_top: teamTop.trim(),
         team_bottom: teamBottom.trim(),
-      });
+      }, authUser?.uid);
       recordCreate();
       track("game_created", { sport, max_innings: maxInnings });
       router.push(`/games/${id}`);

@@ -6,19 +6,25 @@ import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 
 import { BrandMark } from "@/app/_components/BrandMark";
 import { SportIcon } from "@/app/_components/SportIcon";
+import { useAnonymousAuth } from "@/lib/auth";
 import { formatGameDate } from "@/lib/dates";
 import {
   currentInning,
   hasAnyScore,
   listGames,
+  listMyGames,
   totals,
 } from "@/lib/games";
 import { SPORT_META, SPORT_ORDER } from "@/lib/sports";
 import type { Game, Sport } from "@/lib/types";
 
 type SportFilter = Sport | "all";
+type ListMode = "mine" | "all";
 
 export function GamesList() {
+  const authUser = useAnonymousAuth();
+  const [listMode, setListMode] = useState<ListMode>("mine");
+
   const [games, setGames] = useState<Game[]>([]);
   const [last, setLast] = useState<QueryDocumentSnapshot<DocumentData> | undefined>(undefined);
   const [hasMore, setHasMore] = useState(false);
@@ -31,13 +37,26 @@ export function GamesList() {
 
   useEffect(() => {
     let alive = true;
+    setLoading(true);
+    setGames([]);
+    setLast(undefined);
+    setHasMore(false);
+    setError(null);
+
     (async () => {
       try {
-        const res = await listGames();
-        if (!alive) return;
-        setGames(res.games);
-        setLast(res.last);
-        setHasMore(res.hasMore);
+        if (listMode === "mine") {
+          if (!authUser) return; // wait for auth
+          const myGames = await listMyGames(authUser.uid);
+          if (!alive) return;
+          setGames(myGames);
+        } else {
+          const res = await listGames();
+          if (!alive) return;
+          setGames(res.games);
+          setLast(res.last);
+          setHasMore(res.hasMore);
+        }
       } catch (e) {
         if (!alive) return;
         setError((e as Error).message);
@@ -48,10 +67,10 @@ export function GamesList() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [listMode, authUser]);
 
   async function loadMore() {
-    if (!last || loadingMore) return;
+    if (!last || loadingMore || listMode === "mine") return;
     setLoadingMore(true);
     try {
       const res = await listGames(last);
@@ -95,7 +114,7 @@ export function GamesList() {
             <div>
               <div className="text-[20px] font-bold leading-[1.1] tracking-[0.04em]">スコアボ</div>
               <div className="mt-0.5 text-[9px] tracking-[0.18em] opacity-85">
-                SCORE SHARING APP
+                スコアをリアルタイム共有
               </div>
             </div>
           </Link>
@@ -121,6 +140,31 @@ export function GamesList() {
             </svg>
             使い方
           </Link>
+        </div>
+
+        <div className="mb-3 flex gap-1.5 rounded-xl bg-white/10 p-1">
+          <button
+            type="button"
+            onClick={() => setListMode("mine")}
+            className={`flex-1 rounded-lg py-1.5 text-[13px] font-semibold transition-colors ${
+              listMode === "mine"
+                ? "bg-white text-brand-dark shadow-sm"
+                : "text-white/80"
+            }`}
+          >
+            自分の試合
+          </button>
+          <button
+            type="button"
+            onClick={() => setListMode("all")}
+            className={`flex-1 rounded-lg py-1.5 text-[13px] font-semibold transition-colors ${
+              listMode === "all"
+                ? "bg-white text-brand-dark shadow-sm"
+                : "text-white/80"
+            }`}
+          >
+            すべて
+          </button>
         </div>
 
         <label className="mb-3 flex items-center gap-2 rounded-xl bg-white px-3.5 py-2.5">
@@ -174,7 +218,7 @@ export function GamesList() {
         {loading ? (
           <div className="py-12 text-center text-sm text-ink-sub">読み込み中…</div>
         ) : games.length === 0 ? (
-          <EmptyState />
+          <EmptyState mine={listMode === "mine"} />
         ) : (
           <>
             {live.length > 0 && (
@@ -346,13 +390,17 @@ function GameCard({ game }: { game: Game }) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ mine }: { mine: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-card px-6 py-12 text-center">
       <div className="mb-3 text-3xl" aria-hidden="true">⚾️</div>
-      <div className="mb-1 text-sm font-semibold text-ink">まだ試合がありません</div>
+      <div className="mb-1 text-sm font-semibold text-ink">
+        {mine ? "まだ試合を作成していません" : "試合がありません"}
+      </div>
       <div className="text-[12px] text-ink-sub">
-        下のボタンから最初の試合を作成しましょう。
+        {mine
+          ? "下のボタンから試合を作成すると、ここに表示されます。"
+          : "下のボタンから最初の試合を作成しましょう。"}
       </div>
     </div>
   );

@@ -12,6 +12,8 @@ export type GameStatus = "in_progress" | "completed";
 
 export type Game = {
   id: string;
+  view_token?: string;
+  owner_uid?: string;
   sport: Sport;
   date: string; // YYYY-MM-DD
   location: string;

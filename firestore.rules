@@ -25,7 +25,7 @@ service cloud.firestore {
     function gameKeysOk(data) {
       return data.keys().hasOnly([
         'sport','date','location','team_top','team_bottom',
-        'max_innings','innings','status','created_at','updated_at'
+        'max_innings','innings','status','created_at','updated_at','view_token','owner_uid'
       ]) && data.keys().hasAll([
         'sport','date','location','team_top','team_bottom',
         'max_innings','innings','status','created_at','updated_at'
@@ -42,7 +42,9 @@ service cloud.firestore {
         && isInningList(data.innings)
         && isStatus(data.status)
         && data.created_at is timestamp
-        && data.updated_at is timestamp;
+        && data.updated_at is timestamp
+        && (!data.keys().hasAny(['view_token']) || (data.view_token is string && data.view_token.size() > 0))
+        && (!data.keys().hasAny(['owner_uid']) || (data.owner_uid is string && data.owner_uid.size() > 0));
     }
 
     match /games/{gameId} {
@@ -65,6 +67,14 @@ service cloud.firestore {
         );
 
       allow delete: if true;
+    }
+
+    match /view_tokens/{viewToken} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['game_id'])
+        && request.resource.data.game_id is string
+        && request.resource.data.game_id.size() > 0;
+      allow update, delete: if false;
     }
   }
 }

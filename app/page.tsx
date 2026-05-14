@@ -61,7 +61,7 @@ function Hero() {
             スコアボ
           </div>
           <div className="mt-0.5 text-[9px] tracking-[0.18em] opacity-85">
-            SCORE SHARING APP
+            スコアをリアルタイム共有
           </div>
         </div>
       </div>
@@ -78,11 +78,11 @@ function Hero() {
       </h1>
 
       <p className="relative z-[1] mb-6 text-[14px] leading-[1.7] opacity-95">
-        草野球・ソフトボールの試合をスマホ1台で記録。
+        得点板のないグラウンドでも、家族や保護者が
         <br />
-        QRを見せるだけで家族・観客も
+        リアルタイムでスコアを追えます。
         <br />
-        リアルタイムで見られます。
+        スコアラーはスマホ1台、観客はQRを読むだけ。
       </p>
 
       <Link

@@ -1,8 +1,8 @@
 import {
-  addDoc,
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   limit,
   onSnapshot,
@@ -11,6 +11,8 @@ import {
   serverTimestamp,
   startAfter,
   updateDoc,
+  where,
+  writeBatch,
   type DocumentData,
   type QueryDocumentSnapshot,
 } from "firebase/firestore";
@@ -25,6 +27,8 @@ function fromDoc(d: QueryDocumentSnapshot<DocumentData>): Game {
   const data = d.data();
   return {
     id: d.id,
+    view_token: data.view_token as string | undefined,
+    owner_uid: data.owner_uid as string | undefined,
     sport: data.sport,
     date: data.date,
     location: data.location ?? "",
@@ -38,6 +42,19 @@ function fromDoc(d: QueryDocumentSnapshot<DocumentData>): Game {
   };
 }
 
+export async function listMyGames(ownerUid: string): Promise<Game[]> {
+  const ref = collection(db, COL);
+  const q = query(ref, where("owner_uid", "==", ownerUid));
+  const snap = await getDocs(q);
+  const games = snap.docs.map(fromDoc);
+  games.sort((a, b) => {
+    const aMs = a.created_at?.toMillis?.() ?? 0;
+    const bMs = b.created_at?.toMillis?.() ?? 0;
+    return bMs - aMs;
+  });
+  return games;
+}
+
 export async function listGames(after?: QueryDocumentSnapshot<DocumentData>) {
   const ref = collection(db, COL);
   const q = after
@@ -49,15 +66,48 @@ export async function listGames(after?: QueryDocumentSnapshot<DocumentData>) {
   return { games, last, hasMore: snap.size === PAGE_SIZE };
 }
 
-export async function createGame(draft: GameDraft) {
-  const ref = await addDoc(collection(db, COL), {
+export async function createGame(draft: GameDraft, ownerUid?: string) {
+  const viewToken = crypto.randomUUID().replace(/-/g, "");
+  const batch = writeBatch(db);
+  const gameRef = doc(collection(db, COL));
+  batch.set(gameRef, {
     ...draft,
+    view_token: viewToken,
+    ...(ownerUid ? { owner_uid: ownerUid } : {}),
     innings: [],
     status: "in_progress" as GameStatus,
     created_at: serverTimestamp(),
     updated_at: serverTimestamp(),
   });
-  return ref.id;
+  batch.set(doc(db, "view_tokens", viewToken), { game_id: gameRef.id });
+  await batch.commit();
+  return gameRef.id;
+}
+
+export function watchGameByViewToken(
+  viewToken: string,
+  cb: (game: Game | null) => void,
+): () => void {
+  let cancelled = false;
+  let unsub: (() => void) | null = null;
+
+  getDoc(doc(db, "view_tokens", viewToken))
+    .then((snap) => {
+      if (cancelled) return;
+      if (!snap.exists()) {
+        cb(null);
+        return;
+      }
+      unsub = watchGame(snap.data().game_id as string, cb);
+    })
+    .catch(() => {
+      if (!cancelled) cb(null);
+    });
+
+  return () => {
+    cancelled = true;
+    unsub?.();
+  };
 }
 
 export function watchGame(id: string, cb: (game: Game | null) => void) {
