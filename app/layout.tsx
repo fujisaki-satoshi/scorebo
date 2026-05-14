@@ -36,6 +36,7 @@ export const viewport: Viewport = {
   themeColor: "#1a7a35",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -46,7 +47,7 @@ export default function RootLayout({
   return (
     <html lang="ja" className="h-full antialiased">
       <body className="min-h-screen bg-canvas text-ink">
-        <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-canvas shadow-[0_0_0_1px_rgba(0,0,0,0.04)]">
+        <div className="mx-auto flex min-h-screen w-full max-w-[480px] flex-col bg-canvas pb-[env(safe-area-inset-bottom)] shadow-[0_0_0_1px_rgba(0,0,0,0.04)]">
           {children}
         </div>
         <Analytics />

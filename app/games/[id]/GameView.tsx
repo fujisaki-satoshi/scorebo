@@ -275,24 +275,24 @@ export function GameView({ id }: { id: string }) {
           )}
         </div>
 
-        <div className="mb-2.5 grid grid-cols-[1fr_auto_1fr] items-center gap-3.5">
+        <div className="mb-2 grid grid-cols-[1fr_auto_1fr] items-center gap-3.5">
           <div className="flex flex-col items-center text-center">
-            <div className="text-[15px] font-semibold leading-tight">{game.team_top || "—"}</div>
-            <div className="mt-0.5 text-[10px] opacity-85">先攻</div>
+            <div className="text-[18px] font-bold leading-tight">{game.team_top || "—"}</div>
+            <div className="mt-0.5 text-[11px] opacity-90">先攻</div>
           </div>
-          <div className="self-center text-[28px] font-light leading-none opacity-60">vs</div>
+          <div className="self-center text-[28px] font-light leading-none opacity-50">vs</div>
           <div className="flex flex-col items-center text-center">
-            <div className="text-[15px] font-semibold leading-tight">{game.team_bottom || "—"}</div>
-            <div className="mt-0.5 text-[10px] opacity-85">後攻</div>
+            <div className="text-[18px] font-bold leading-tight">{game.team_bottom || "—"}</div>
+            <div className="mt-0.5 text-[11px] opacity-90">後攻</div>
           </div>
         </div>
 
-        <div className="-mt-0.5 grid grid-cols-[1fr_auto_1fr] items-center gap-3.5">
-          <div className="text-center text-[56px] font-extrabold leading-none tabular-nums">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3.5">
+          <div className="text-center text-[68px] font-extrabold leading-none tabular-nums drop-shadow-sm">
             {top}
           </div>
-          <div className="text-center text-4xl font-light opacity-60">−</div>
-          <div className="text-center text-[56px] font-extrabold leading-none tabular-nums">
+          <div className="text-center text-4xl font-light opacity-50">−</div>
+          <div className="text-center text-[68px] font-extrabold leading-none tabular-nums drop-shadow-sm">
             {bottom}
           </div>
         </div>
@@ -370,7 +370,7 @@ export function GameView({ id }: { id: string }) {
           type="button"
           onClick={handleSaveInning}
           disabled={saving}
-          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-3 text-sm font-bold text-white active:bg-brand-dark disabled:opacity-50"
+          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-4 text-base font-bold text-white active:bg-brand-dark disabled:opacity-50"
         >
           <svg
             width="16"
@@ -393,7 +393,7 @@ export function GameView({ id }: { id: string }) {
         <button
           type="button"
           onClick={handleAddInning}
-          className="rounded-xl border border-dashed border-line bg-transparent py-2.5 text-center text-[13px] text-ink-sub hover:border-brand hover:bg-card hover:text-brand"
+          className="rounded-xl border border-dashed border-line bg-transparent py-4 text-center text-[14px] text-ink-sub hover:border-brand hover:bg-card hover:text-brand"
         >
           ＋ イニングを追加
         </button>
@@ -402,8 +402,8 @@ export function GameView({ id }: { id: string }) {
           onClick={handleToggleStatus}
           className={
             game.status === "completed"
-              ? "rounded-xl border border-line bg-card py-2.5 text-center text-[13px] font-semibold text-ink-sub hover:text-brand"
-              : "rounded-xl border border-brand bg-card py-2.5 text-center text-[13px] font-semibold text-brand hover:bg-brand-light"
+              ? "rounded-xl border border-line bg-card py-4 text-center text-[14px] font-semibold text-ink-sub hover:text-brand"
+              : "rounded-xl border border-brand bg-card py-4 text-center text-[14px] font-semibold text-brand hover:bg-brand-light"
           }
         >
           {game.status === "completed" ? "↩ 試合を再開" : "🏁 試合を終了"}
@@ -474,13 +474,13 @@ function ScoreTable({
         </colgroup>
         <thead>
           <tr>
-            <th className="border-b border-r border-line bg-canvas py-2 px-2 text-left text-[11px] font-semibold text-ink-sub">
+            <th className="border-b border-r border-line bg-canvas py-2.5 px-2 text-left text-[12px] font-semibold text-ink-sub">
               チーム
             </th>
             {inningNumbers.map((n) => (
               <th
                 key={n}
-                className={`border-b border-r border-line bg-canvas py-2 text-[11px] font-semibold text-ink-sub ${
+                className={`border-b border-r border-line bg-canvas py-2.5 text-[12px] font-semibold text-ink-sub ${
                   n === editingInning
                     ? "bg-accent-soft shadow-[inset_0_0_0_1.5px_var(--color-accent)]"
                     : n > maxInnings
@@ -491,7 +491,7 @@ function ScoreTable({
                 {n}
               </th>
             ))}
-            <th className="border-b border-line bg-brand-light py-2 text-[11px] font-bold text-brand-dark">
+            <th className="border-b border-line bg-brand-light py-2.5 text-[12px] font-bold text-brand-dark">
               計
             </th>
           </tr>
@@ -551,7 +551,7 @@ function ScoreRow({
   return (
     <tr>
       <td
-        className={`${bottomBorder} border-r-[1.5px] border-line bg-[#fafcfa] py-2 pl-2.5 text-left text-[12px] font-semibold`}
+        className={`${bottomBorder} border-r-[1.5px] border-line bg-[#fafcfa] py-2.5 pl-2.5 text-left text-[13px] font-semibold`}
       >
         {label}
       </td>
@@ -564,7 +564,7 @@ function ScoreRow({
           <td
             key={n}
             onClick={() => onPickInning(n)}
-            className={`${bottomBorder} cursor-pointer border-r border-line py-2 ${
+            className={`${bottomBorder} cursor-pointer border-r border-line py-2.5 text-[14px] ${
               isActive
                 ? "bg-accent-soft shadow-[inset_0_0_0_1.5px_var(--color-accent)]"
                 : isExtra
@@ -577,7 +577,7 @@ function ScoreRow({
         );
       })}
       <td
-        className={`${bottomBorder} bg-brand-light py-2 font-bold text-brand-dark`}
+        className={`${bottomBorder} bg-brand-light py-2.5 text-[14px] font-bold text-brand-dark`}
       >
         {total}
       </td>
@@ -597,26 +597,26 @@ function StepperRow({
   onChange: (n: number) => void;
 }) {
   return (
-    <div className="flex items-center justify-between py-2">
-      <div className="text-[13px]">
-        <span className="font-medium">{label}</span>
-        <span className="ml-1 text-[11px] text-ink-sub">({side})</span>
+    <div className="flex items-center justify-between py-3">
+      <div className="text-[14px]">
+        <span className="font-semibold">{label}</span>
+        <span className="ml-1 text-[12px] text-ink-sub">({side})</span>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <button
           type="button"
           onClick={() => onChange(Math.max(0, value - 1))}
           disabled={value <= 0}
-          className="flex h-8 w-8 items-center justify-center rounded-full border-[1.5px] border-brand bg-card text-lg font-bold leading-none text-brand active:bg-brand-light disabled:cursor-not-allowed disabled:border-line disabled:text-[#ccc]"
+          className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-brand bg-card text-2xl font-bold leading-none text-brand active:bg-brand-light disabled:cursor-not-allowed disabled:border-line disabled:text-[#ccc]"
           aria-label="-1"
         >
           −
         </button>
-        <span className="min-w-7 text-center text-[22px] font-bold tabular-nums">{value}</span>
+        <span className="min-w-10 text-center text-[32px] font-bold tabular-nums">{value}</span>
         <button
           type="button"
           onClick={() => onChange(Math.min(99, value + 1))}
-          className="flex h-8 w-8 items-center justify-center rounded-full border-[1.5px] border-brand bg-card text-lg font-bold leading-none text-brand active:bg-brand-light"
+          className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-brand bg-card text-2xl font-bold leading-none text-brand active:bg-brand-light"
           aria-label="+1"
         >
           ＋

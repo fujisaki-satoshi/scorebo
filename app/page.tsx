@@ -3,16 +3,17 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 import { BrandMark } from "@/app/_components/BrandMark";
+import { DemoSlider } from "@/app/_components/DemoSlider";
 
 const SITE_DESC =
-  "野球・ソフトボール・キックベースのスコアをスマホで記録し、QRコードを見せるだけで応援団・家族・チームメイトみんなにリアルタイム共有できる無料Webアプリ。アカウント登録不要・完全無料・インストール不要。";
+  "草野球・ソフトボールの得点板をスマホで。QRコードを見せるだけで保護者・観客がリアルタイムでスコアボードを観戦できる無料Webアプリ。野球・キックベース対応。アカウント登録不要・完全無料。";
 
 export const metadata: Metadata = {
-  title: "スコアボ — QRひとつで試合スコアをみんなにリアルタイム共有",
+  title: "スコアボ — 草野球・ソフトボールのリアルタイムスコアボード",
   description: SITE_DESC,
   alternates: { canonical: "/" },
   openGraph: {
-    title: "スコアボ — QRひとつで試合スコアをみんなにリアルタイム共有",
+    title: "スコアボ — 草野球・ソフトボールのリアルタイムスコアボード",
     description: SITE_DESC,
     url: "/",
     siteName: "スコアボ",
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "スコアボ — QRひとつで試合スコアをみんなにリアルタイム共有",
+    title: "スコアボ — 草野球・ソフトボールのリアルタイムスコアボード",
     description: SITE_DESC,
   },
 };
@@ -30,8 +31,10 @@ export default function LandingPage() {
   return (
     <>
       <Hero />
+      <DemoSlider />
+      <UsageScenes />
       <HowToUse />
-      <Features />
+      <SpectatorShare />
       <Faq />
       <FinalCta />
       <Footer />
@@ -64,22 +67,22 @@ function Hero() {
       </div>
 
       <h1 className="relative z-[1] mb-4 text-[28px] font-extrabold leading-[1.35] tracking-[0.01em]">
-        QRひとつで、
+        得点板がない
         <br />
-        試合のスコアを
+        グラウンドでも、
         <br />
-        みんなに
+        みんなで
         <span className="inline-block rounded bg-accent px-1.5 text-[#1a1a1a]">
-          リアルタイム共有
+          観戦
         </span>
       </h1>
 
       <p className="relative z-[1] mb-6 text-[14px] leading-[1.7] opacity-95">
-        野球・ソフトボール・キックベースのスコアをスマホで記録。
+        草野球・ソフトボールの試合をスマホ1台で記録。
         <br />
-        QRコードを見せるだけで、応援団も家族も
+        QRを見せるだけで保護者・観客も
         <br />
-        リアルタイムで観戦できます。
+        リアルタイムで見られます。
       </p>
 
       <Link
@@ -88,17 +91,25 @@ function Hero() {
       >
         ＋ 無料で試合を作成する
       </Link>
-      <a
-        href="#how-to-use"
-        className="relative z-[1] block text-center text-[13px] text-white/90 underline underline-offset-[3px]"
-      >
-        使い方を見る ↓
-      </a>
+      <div className="relative z-[1] flex justify-center gap-5">
+        <a
+          href="#how-to-use"
+          className="text-[13px] text-white/90 underline underline-offset-[3px]"
+        >
+          使い方を見る ↓
+        </a>
+        <Link
+          href="/games/sample"
+          className="text-[13px] text-white/90 underline underline-offset-[3px]"
+        >
+          サンプルを見る →
+        </Link>
+      </div>
 
       <div className="relative z-[1] mt-[22px] flex items-center justify-center gap-3.5 text-[11px] opacity-90">
         <HeroMetaCheck>アカウント不要</HeroMetaCheck>
         <HeroMetaCheck>完全無料</HeroMetaCheck>
-        <HeroMetaCheck>インストール不要</HeroMetaCheck>
+        <HeroMetaCheck>タブレットで得点板に</HeroMetaCheck>
       </div>
 
       <HeroVisual />
@@ -330,79 +341,48 @@ function StepPhone({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-function Features() {
-  const list = [
+function UsageScenes() {
+  const scenes = [
     {
-      title: "アカウント不要",
-      body: (
-        <>
-          登録ゼロ。
-          <br />
-          URL/QRだけで全員が参加
-        </>
-      ),
+      title: "得点板がないグラウンドで",
+      body: "スマホやタブレット1台で今日からすぐ運用できます",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
-          <path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4" />
-          <path d="M8 14h.01" />
-          <path d="M12 14h.01" />
-          <path d="M16 14h.01" />
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z" />
+          <path d="m9 12 2 2 4-4" />
         </svg>
       ),
     },
     {
-      title: "リアルタイム同期",
-      body: (
-        <>
-          誰かが入力すると
-          <br />
-          全員の画面に即反映
-        </>
-      ),
+      title: "保護者へリアルタイム共有",
+      body: "離れた場所からスマホで試合状況をリアルタイムに確認",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 6v6l4 2" />
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       ),
     },
     {
-      title: "完全無料",
-      body: (
-        <>
-          広告なし。
-          <br />
-          追加課金なし
-        </>
-      ),
+      title: "体育館・イベントにも",
+      body: "タブレットをそのまま置くだけで得点板として機能します",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M12 2v4" />
-          <path d="m4.93 4.93 2.83 2.83" />
-          <path d="M2 12h4" />
-          <path d="m4.93 19.07 2.83-2.83" />
-          <path d="M12 18v4" />
-          <path d="m16.24 16.24 2.83 2.83" />
-          <path d="M18 12h4" />
-          <path d="m16.24 7.76 2.83-2.83" />
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" />
+          <path d="M16 3H8" />
+          <path d="M12 3v4" />
         </svg>
       ),
     },
     {
-      title: "PCでも見られる",
-      body: (
-        <>
-          スマホもPCも
-          <br />
-          同じURLで閲覧可
-        </>
-      ),
+      title: "配信画面にも使える",
+      body: "OBS等の配信ソフトにブラウザソースとして表示可能",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="2" y="3" width="20" height="14" rx="2" />
-          <line x1="8" y1="21" x2="16" y2="21" />
-          <line x1="12" y1="17" x2="12" y2="21" />
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m22 8-6 4 6 4V8z" />
+          <rect x="2" y="6" width="14" height="12" rx="2" />
         </svg>
       ),
     },
@@ -410,17 +390,118 @@ function Features() {
 
   return (
     <SectionShell
-      eyebrow="スコアボの特徴"
+      alt
+      eyebrow="利用シーン"
       title={
         <>
-          他にはない
+          こんな場面で
           <br />
-          4つのポイント
+          活躍します
         </>
       }
     >
       <div className="grid grid-cols-2 gap-2.5">
-        {list.map((f) => (
+        {scenes.map((s) => (
+          <div
+            key={s.title}
+            className="rounded-xl border border-line bg-canvas px-3 py-3.5"
+          >
+            <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-brand-light text-brand">
+              <span className="block h-[18px] w-[18px]">{s.icon}</span>
+            </div>
+            <h4 className="mb-1 text-[13px] font-bold leading-[1.4] text-ink">{s.title}</h4>
+            <p className="text-[11px] leading-[1.55] text-ink-sub">{s.body}</p>
+          </div>
+        ))}
+      </div>
+    </SectionShell>
+  );
+}
+
+function SpectatorShare() {
+  const items = [
+    {
+      title: "QRを見せるだけ",
+      body: (
+        <>
+          カメラを向けてもらうだけで
+          <br />
+          観戦スタート
+        </>
+      ),
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
+          <path d="M14 14h3v3h-3zM17 17h3v3h-3zM14 20h3" />
+        </svg>
+      ),
+    },
+    {
+      title: "URLを送るだけ",
+      body: (
+        <>
+          LINEやメールで送れば
+          <br />
+          全員がすぐ見られる
+        </>
+      ),
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+      ),
+    },
+    {
+      title: "全員の画面に即反映",
+      body: (
+        <>
+          スコア入力が
+          <br />
+          リアルタイムで届く
+        </>
+      ),
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+        </svg>
+      ),
+    },
+    {
+      title: "観客はログイン不要",
+      body: (
+        <>
+          アプリDL不要。
+          <br />
+          何もしなくてOK
+        </>
+      ),
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+          <path d="m9 10 2 2 4-4" />
+        </svg>
+      ),
+    },
+  ];
+
+  return (
+    <SectionShell
+      eyebrow="かんたん共有"
+      title={
+        <>
+          観客・保護者に
+          <br />
+          そのまま届ける
+        </>
+      }
+      sub="スコア管理ツールではなく、みんなで試合を楽しむサービスです。"
+    >
+      <div className="grid grid-cols-2 gap-2.5">
+        {items.map((f) => (
           <div
             key={f.title}
             className="rounded-xl border border-line bg-card px-3 py-3.5 text-center"
@@ -509,14 +590,29 @@ function FinalCta() {
 function Footer() {
   return (
     <footer className="border-t border-line bg-card px-[22px] py-[22px] text-center text-[12px] text-ink-sub">
-      <div className="mb-3 flex justify-center gap-[18px]">
+      <div className="mb-3 flex flex-wrap justify-center gap-x-[18px] gap-y-2">
         <Link href="/games" className="font-semibold text-brand">
           試合一覧
         </Link>
         <Link href="/help" className="font-semibold text-brand">
           使い方ガイド
         </Link>
+        <Link href="/terms" className="font-semibold text-brand">
+          利用規約
+        </Link>
+        <Link href="/privacy" className="font-semibold text-brand">
+          プライバシーポリシー
+        </Link>
+        <a
+          href="https://www.instagram.com/scorebo_app"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-brand"
+        >
+          お問い合わせ
+        </a>
       </div>
+      <div className="mb-1 text-[10px] opacity-70">運営者：藤崎 聡</div>
       <div className="text-[10px] opacity-70">© 2026 スコアボ</div>
     </footer>
   );
