@@ -604,7 +604,7 @@ function Footer() {
           プライバシーポリシー
         </Link>
         <a
-          href="https://www.instagram.com/scorebo_app"
+          href="https://forms.gle/jnazDhjgQXr52d6T9"
           target="_blank"
           rel="noopener noreferrer"
           className="font-semibold text-brand"
