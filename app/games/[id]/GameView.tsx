@@ -261,9 +261,8 @@ export function GameView({ id }: { id: string }) {
         )}
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col landscape:flex-row">
-      <div className="landscape:flex-[3] landscape:border-r landscape:border-line">
-      <section className="bg-gradient-to-b from-brand to-brand-dark px-[18px] pt-3.5 pb-[18px] text-white">
+      <section className="bg-gradient-to-b from-brand to-brand-dark px-[18px] pt-3.5 pb-[18px] landscape:py-3 landscape:px-4 text-white">
+        <div className="landscape:hidden">
         <div className="mb-3 flex items-center gap-2 text-[12px] opacity-95">
           <SportIcon sport={game.sport} size={14} />
           <span>{meta.label}</span>
@@ -313,6 +312,34 @@ export function GameView({ id }: { id: string }) {
             {pillText}
           </span>
         </div>
+        </div>
+        <div className="hidden landscape:flex items-center gap-4 py-0.5">
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] opacity-75">先攻</div>
+            <div className="truncate text-[15px] font-bold leading-tight">{game.team_top || "—"}</div>
+          </div>
+          <div className="flex shrink-0 items-center gap-3 tabular-nums">
+            <span className="text-[48px] font-extrabold leading-none drop-shadow-sm">{top}</span>
+            <span className="text-xl font-light opacity-50">−</span>
+            <span className="text-[48px] font-extrabold leading-none drop-shadow-sm">{bottom}</span>
+          </div>
+          <div className="min-w-0 flex-1 text-right">
+            <div className="text-[11px] opacity-75">後攻</div>
+            <div className="truncate text-[15px] font-bold leading-tight">{game.team_bottom || "—"}</div>
+          </div>
+          <span
+            className={`ml-1 inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+              pillVariant === "live"
+                ? "bg-black/25"
+                : pillVariant === "done"
+                  ? "bg-white/20"
+                  : "bg-black/20"
+            }`}
+          >
+            {pillVariant === "live" && <span className="pulse-dot">●</span>}
+            {pillText}
+          </span>
+        </div>
       </section>
 
       <div className="px-4 pt-3.5">
@@ -327,8 +354,6 @@ export function GameView({ id }: { id: string }) {
           totals={{ top, bottom }}
         />
       </div>
-      </div>
-      <div className="landscape:flex-[2]">
 
       <div className="mx-4 mt-3.5 rounded-2xl border border-line bg-card px-4 py-3.5">
         <div className="mb-3 flex items-center gap-1.5 text-[13px] font-semibold text-ink">
@@ -426,8 +451,6 @@ export function GameView({ id }: { id: string }) {
           />
           スコアボで作成 — 無料
         </Link>
-      </div>
-      </div>
       </div>
 
       {modal === "share" && (
