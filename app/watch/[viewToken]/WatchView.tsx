@@ -178,6 +178,8 @@ export function WatchView({ viewToken }: { viewToken: string }) {
         </div>
       </header>
 
+      <div className="flex min-h-0 flex-1 flex-col landscape:flex-row">
+      <div className="landscape:flex-[2] landscape:border-r landscape:border-line">
       <section className="bg-gradient-to-b from-brand to-brand-dark px-[18px] pt-3.5 pb-[18px] text-white">
         <div className="mb-3 flex items-center gap-2 text-[12px] opacity-95">
           <SportIcon sport={game.sport} size={14} />
@@ -229,6 +231,8 @@ export function WatchView({ viewToken }: { viewToken: string }) {
           </span>
         </div>
       </section>
+      </div>
+      <div className="landscape:flex-[3]">
 
       <div className="px-4 pt-3.5">
         <div className="overflow-hidden rounded-xl border border-line bg-card">
@@ -316,6 +320,8 @@ export function WatchView({ viewToken }: { viewToken: string }) {
         >
           試合を作る（無料）
         </Link>
+      </div>
+      </div>
       </div>
     </>
   );

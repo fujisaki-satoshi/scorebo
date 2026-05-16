@@ -261,6 +261,8 @@ export function GameView({ id }: { id: string }) {
         )}
       </header>
 
+      <div className="flex min-h-0 flex-1 flex-col landscape:flex-row">
+      <div className="landscape:flex-[3] landscape:border-r landscape:border-line">
       <section className="bg-gradient-to-b from-brand to-brand-dark px-[18px] pt-3.5 pb-[18px] text-white">
         <div className="mb-3 flex items-center gap-2 text-[12px] opacity-95">
           <SportIcon sport={game.sport} size={14} />
@@ -325,6 +327,8 @@ export function GameView({ id }: { id: string }) {
           totals={{ top, bottom }}
         />
       </div>
+      </div>
+      <div className="landscape:flex-[2]">
 
       <div className="mx-4 mt-3.5 rounded-2xl border border-line bg-card px-4 py-3.5">
         <div className="mb-3 flex items-center gap-1.5 text-[13px] font-semibold text-ink">
@@ -422,6 +426,8 @@ export function GameView({ id }: { id: string }) {
           />
           スコアボで作成 — 無料
         </Link>
+      </div>
+      </div>
       </div>
 
       {modal === "share" && (
@@ -712,8 +718,8 @@ function ShareModal({ game, onClose }: { game: Game; onClose: () => void }) {
     : "#";
 
   return (
-    <div className="fixed inset-0 z-30 mx-auto w-full max-w-[480px] bg-black/50 p-4">
-      <div className="absolute inset-x-4 top-6 bottom-4 overflow-y-auto rounded-2xl bg-card p-5">
+    <div className="fixed inset-0 z-30 mx-auto w-full max-w-[480px] landscape:max-w-[900px] bg-black/50 p-4 landscape:flex landscape:items-center landscape:justify-center">
+      <div className="absolute inset-x-4 top-6 bottom-4 overflow-y-auto rounded-2xl bg-card p-5 landscape:static landscape:inset-auto landscape:w-full landscape:max-w-[440px] landscape:max-h-[85vh]">
         <div className="mb-3.5 flex items-center justify-between">
           <div className="text-base font-bold">試合をシェア</div>
           <button
@@ -952,14 +958,14 @@ function EditSheet({ game, onClose }: { game: Game; onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-30 mx-auto flex w-full max-w-[480px] items-end justify-center bg-black/50">
+    <div className="fixed inset-0 z-30 mx-auto flex w-full max-w-[480px] landscape:max-w-[900px] items-end justify-center bg-black/50">
       <button
         type="button"
         aria-label="閉じる"
         onClick={onClose}
         className="absolute inset-0"
       />
-      <div className="relative max-h-[92%] w-full overflow-y-auto rounded-t-3xl bg-card px-[18px] pt-3.5 pb-6">
+      <div className="relative max-h-[92%] w-full overflow-y-auto rounded-t-3xl bg-card px-[18px] pt-3.5 pb-6 landscape:max-w-[480px] landscape:rounded-2xl landscape:max-h-[85vh]">
         <div className="mx-auto mb-3 h-1 w-10 rounded bg-[#d4d4d4]" />
         <div className="mb-3.5 flex items-center justify-between">
           <div className="text-base font-bold">試合情報を編集</div>
@@ -1153,7 +1159,7 @@ function DeleteDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-30 mx-auto flex w-full max-w-[480px] items-center justify-center bg-black/50 p-5">
+    <div className="fixed inset-0 z-30 mx-auto flex w-full max-w-[480px] landscape:max-w-[900px] items-center justify-center bg-black/50 p-5">
       <button
         type="button"
         aria-label="閉じる"
