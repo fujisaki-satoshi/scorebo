@@ -28,7 +28,7 @@ type Modal = "share" | "edit" | "delete" | null;
 
 function teamShort(name: string): string {
   if (!name) return "—";
-  return name.length > 5 ? name.slice(0, 5) + "…" : name;
+  return name.length > 8 ? name.slice(0, 8) + "…" : name;
 }
 
 export function GameView({ id }: { id: string }) {
@@ -495,7 +495,7 @@ function ScoreTable({
     <div className="overflow-hidden rounded-xl border border-line bg-card">
       <table className="w-full table-fixed border-separate border-spacing-0 text-center text-[13px] tabular-nums">
         <colgroup>
-          <col style={{ width: 64 }} />
+          <col style={{ width: 88 }} />
           {inningNumbers.map((n) => (
             <col key={n} />
           ))}
