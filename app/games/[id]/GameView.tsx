@@ -169,7 +169,7 @@ export function GameView({ id }: { id: string }) {
         <button
           type="button"
           onClick={() => setMenuOpen((o) => !o)}
-          className="ml-0.5 flex h-9 w-9 items-center justify-center rounded-full text-ink-sub hover:bg-canvas"
+          className="ml-0.5 flex h-9 w-9 items-center justify-center rounded-full text-ink-sub active:bg-canvas"
           aria-label="メニュー"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -190,14 +190,14 @@ export function GameView({ id }: { id: string }) {
               <button
                 type="button"
                 onClick={() => { setMenuOpen(false); setModal("edit"); }}
-                className="block w-full px-4 py-3 text-left text-sm hover:bg-canvas"
+                className="block w-full px-4 py-3 text-left text-sm active:bg-canvas"
               >
                 試合情報を編集
               </button>
               <button
                 type="button"
                 onClick={() => { setMenuOpen(false); setModal("delete"); }}
-                className="block w-full border-t border-line px-4 py-3 text-left text-sm text-live hover:bg-canvas"
+                className="block w-full border-t border-line px-4 py-3 text-left text-sm text-live active:bg-canvas"
               >
                 この試合を削除
               </button>
@@ -278,7 +278,7 @@ export function GameView({ id }: { id: string }) {
         <button
           type="button"
           onClick={handleAddInning}
-          className="rounded-xl border border-dashed border-line bg-transparent py-4 text-center text-[14px] text-ink-sub hover:border-brand hover:bg-card hover:text-brand"
+          className="rounded-xl border border-dashed border-line bg-transparent py-4 text-center text-[14px] text-ink-sub active:border-brand active:bg-card active:text-brand"
         >
           ＋ イニングを追加
         </button>
@@ -287,8 +287,8 @@ export function GameView({ id }: { id: string }) {
           onClick={handleToggleStatus}
           className={
             game.status === "completed"
-              ? "rounded-xl border border-line bg-card py-4 text-center text-[14px] font-semibold text-ink-sub hover:text-brand"
-              : "rounded-xl border border-brand bg-card py-4 text-center text-[14px] font-semibold text-brand hover:bg-brand-light"
+              ? "rounded-xl border border-line bg-card py-4 text-center text-[14px] font-semibold text-ink-sub active:text-brand"
+              : "rounded-xl border border-brand bg-card py-4 text-center text-[14px] font-semibold text-brand active:bg-brand-light"
           }
         >
           {game.status === "completed" ? "↩ 試合を再開" : "🏁 試合を終了"}
