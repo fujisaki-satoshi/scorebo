@@ -1,7 +1,7 @@
 import { createHash, randomBytes, timingSafeEqual } from "crypto";
 
 export function generateRecoveryKey(): string {
-  const buf = randomBytes(6);
+  const buf = randomBytes(12);
   const digits = Array.from(buf).map((b) => b % 10).join("");
   return `SB-${digits.slice(0, 4)}-${digits.slice(4, 8)}-${digits.slice(8, 12)}`;
 }
