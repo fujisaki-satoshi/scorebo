@@ -182,7 +182,7 @@ function FieldCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mb-3.5 rounded-2xl border border-line bg-card px-4 py-3.5">
+    <div className="mb-3.5 min-w-0 rounded-2xl border border-line bg-card px-4 py-3.5">
       <div className="mb-2.5 text-[12px] font-semibold tracking-[0.04em] text-ink-sub">
         {label}
         {required && <span className="ml-0.5 text-[#c0392b]">*</span>}
