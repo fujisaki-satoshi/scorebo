@@ -25,17 +25,17 @@ export default function KeyRestoreDonePage() {
   const memoryQuote = result?.memoryQuote ?? null;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-paper px-6 py-12 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-canvas px-6 py-12 text-center">
       {/* Stamp */}
       <div
-        className="mb-6 flex h-[88px] w-[88px] items-center justify-center rounded-full bg-brand-light text-[40px] font-serif font-bold text-brand"
+        className="mb-6 flex h-[88px] w-[88px] items-center justify-center rounded-full bg-brand-light text-[40px] font-sans font-bold text-brand"
         style={{ transform: "rotate(-6deg)" }}
         aria-hidden="true"
       >
         ✓
       </div>
 
-      <h1 className="mb-3 font-serif text-[28px] font-bold leading-[1.3] text-ink">
+      <h1 className="mb-3 font-sans text-[28px] font-bold leading-[1.3] text-ink">
         おかえりなさい、
         <br />
         あなたの記録へ。
@@ -46,11 +46,11 @@ export default function KeyRestoreDonePage() {
 
       {/* Stats card */}
       {gameCount > 0 && (
-        <div className="mb-6 w-full max-w-[320px] rounded-xl border border-rule-soft bg-white p-4">
+        <div className="mb-6 w-full max-w-[320px] rounded-xl border border-line bg-white p-4">
           <div className="grid grid-cols-1 gap-2">
             <div className="text-center">
-              <p className="font-mono text-[11px] tracking-[0.1em] text-ink-mute">試合数</p>
-              <p className="font-serif text-[28px] font-bold text-stamp">{gameCount}</p>
+              <p className="font-mono text-[11px] tracking-[0.1em] text-ink-sub">試合数</p>
+              <p className="font-sans text-[28px] font-bold text-brand">{gameCount}</p>
             </div>
           </div>
         </div>
@@ -58,9 +58,9 @@ export default function KeyRestoreDonePage() {
 
       {/* Memory quote */}
       {memoryQuote && (
-        <div className="mb-8 w-full max-w-[320px] rounded-xl border border-rule-soft bg-paper-warm px-4 py-3">
-          <p className="mb-1 font-serif text-[14px] italic text-ink">&ldquo;{memoryQuote.text}&rdquo;</p>
-          <p className="font-mono text-[11px] text-ink-mute">
+        <div className="mb-8 w-full max-w-[320px] rounded-xl border border-line bg-brand-light px-4 py-3">
+          <p className="mb-1 font-sans text-[14px] italic text-ink">&ldquo;{memoryQuote.text}&rdquo;</p>
+          <p className="font-mono text-[11px] text-ink-sub">
             {memoryQuote.date}
             {memoryQuote.location ? ` · ${memoryQuote.location}` : ""}
           </p>

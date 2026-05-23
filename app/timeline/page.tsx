@@ -18,7 +18,7 @@ export default function TimelinePage() {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             試合一覧
           </Link>
-          <h1 className="font-serif text-[24px] font-bold leading-[1.3]">
+          <h1 className="font-sans text-[24px] font-bold leading-[1.3]">
             シーズン年表
           </h1>
           <p className="mt-1 text-[12px] text-white/75">2026 シーズン</p>

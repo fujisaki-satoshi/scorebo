@@ -21,19 +21,19 @@ export function RecoveryKeyBanner({ gameCount }: { gameCount: number }) {
   if (!visible) return null;
 
   return (
-    <div className="mx-4 mb-3 overflow-hidden rounded-[10px] border border-dashed border-stamp/60 bg-paper-warm">
+    <div className="mx-4 mb-3 overflow-hidden rounded-[10px] border border-dashed border-brand/60 bg-brand-light">
       <Link href="/keys/new" className="flex items-center gap-2.5 px-3 py-2.5">
         {/* Key icon */}
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-stamp text-[14px] text-white">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand text-[14px] text-white">
           🔑
         </span>
 
         {/* Text */}
         <span className="flex-1 min-w-0">
-          <span className="block text-[12px] font-bold leading-tight text-stamp-deep">
+          <span className="block text-[12px] font-bold leading-tight text-brand-dark">
             この記録は、今の端末だけにあります
           </span>
-          <span className="block text-[10.5px] leading-relaxed text-ink-mute">
+          <span className="block text-[10.5px] leading-relaxed text-ink-sub">
             新しい端末でも戻れるように、鍵を作っておけます。
           </span>
         </span>
@@ -48,7 +48,7 @@ export function RecoveryKeyBanner({ gameCount }: { gameCount: number }) {
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="shrink-0 text-stamp"
+          className="shrink-0 text-brand"
           aria-hidden="true"
         >
           <path d="m9 18 6-6-6-6" />
@@ -60,7 +60,7 @@ export function RecoveryKeyBanner({ gameCount }: { gameCount: number }) {
         <button
           type="button"
           onClick={handleDismiss}
-          className="text-[10px] text-ink-mute"
+          className="text-[10px] text-ink-sub"
         >
           あとで · ✕
         </button>

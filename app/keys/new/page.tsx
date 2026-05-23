@@ -62,21 +62,21 @@ export default function KeyGenIntroPage() {
   ];
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-paper px-5 pt-4 pb-32">
+    <div className="relative flex min-h-screen flex-col bg-canvas px-5 pt-4 pb-32">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <Link href="/games" className="flex items-center gap-1 text-[13px] text-ink-mute">
+        <Link href="/games" className="flex items-center gap-1 text-[13px] text-ink-sub">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           戻る
         </Link>
-        <span className="font-mono text-[10px] tracking-[0.16em] text-stamp">STEP 1 / 2</span>
+        <span className="font-mono text-[10px] tracking-[0.16em] text-brand">STEP 1 / 2</span>
       </div>
 
       {/* Eyebrow */}
-      <p className="mb-1 font-mono text-[10px] tracking-[0.16em] text-stamp">復元の鍵</p>
+      <p className="mb-1 font-mono text-[10px] tracking-[0.16em] text-brand">復元の鍵</p>
 
       {/* Title */}
-      <h1 className="mb-6 font-serif text-[26px] font-bold leading-[1.3] text-ink">
+      <h1 className="mb-6 font-sans text-[26px] font-bold leading-[1.3] text-ink">
         あなただけの
         <br />
         鍵をつくります
@@ -86,12 +86,12 @@ export default function KeyGenIntroPage() {
       <div className="mb-6 flex flex-col gap-3">
         {points.map((p) => (
           <div key={p.title} className="flex gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-rule-soft bg-paper-warm text-[18px]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-brand-light text-[18px]">
               {p.icon}
             </div>
             <div>
               <p className="text-[13.5px] font-semibold leading-tight text-ink">{p.title}</p>
-              <p className="mt-0.5 text-[11.5px] leading-relaxed text-ink-mute">{p.body}</p>
+              <p className="mt-0.5 text-[11.5px] leading-relaxed text-ink-sub">{p.body}</p>
             </div>
           </div>
         ))}
@@ -105,16 +105,16 @@ export default function KeyGenIntroPage() {
       )}
 
       {/* CTA */}
-      <div className="fixed inset-x-0 bottom-0 mx-auto w-full max-w-[480px] px-5 pb-8 pt-4 bg-paper/90 backdrop-blur-sm">
+      <div className="fixed inset-x-0 bottom-0 mx-auto w-full max-w-[480px] px-5 pb-8 pt-4 bg-canvas/90 backdrop-blur-sm">
         <button
           type="button"
           onClick={handleCreate}
           disabled={loading || !user}
-          className="block w-full rounded-xl bg-stamp py-3.5 text-center text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(184,122,44,0.3)] disabled:opacity-50"
+          className="block w-full rounded-xl bg-brand py-3.5 text-center text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(26,122,53,0.3)] disabled:opacity-50"
         >
           {loading ? "作成中…" : "鍵をつくる →"}
         </button>
-        <p className="mt-2 text-center font-mono text-[10.5px] text-ink-mute">
+        <p className="mt-2 text-center font-mono text-[10.5px] text-ink-sub">
           かかる時間 · 約 1 分
         </p>
       </div>

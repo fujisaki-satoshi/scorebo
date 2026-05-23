@@ -84,32 +84,32 @@ export default function KeyRestoreInputPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-paper px-5 pt-4 pb-32">
+    <div className="relative min-h-screen bg-canvas px-5 pt-4 pb-32">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <Link href="/games" className="flex items-center gap-1 text-[13px] text-ink-mute">
+        <Link href="/games" className="flex items-center gap-1 text-[13px] text-ink-sub">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           戻る
         </Link>
-        <span className="font-mono text-[10px] tracking-[0.16em] text-stamp">新しい端末</span>
+        <span className="font-mono text-[10px] tracking-[0.16em] text-brand">新しい端末</span>
       </div>
 
-      <p className="mb-1 font-mono text-[10px] tracking-[0.16em] text-stamp">復元する</p>
-      <h1 className="mb-2 font-serif text-[24px] font-bold leading-[1.3] text-ink">
+      <p className="mb-1 font-mono text-[10px] tracking-[0.16em] text-brand">復元する</p>
+      <h1 className="mb-2 font-sans text-[24px] font-bold leading-[1.3] text-ink">
         鍵で、記録を戻す
       </h1>
-      <p className="mb-8 text-[12px] leading-relaxed text-ink-mute">
+      <p className="mb-8 text-[12px] leading-relaxed text-ink-sub">
         以前の端末でつくった鍵を入力します。
       </p>
 
       {/* Manual input */}
       <div className="mb-2">
-        <p className="mb-2 font-mono text-[10px] tracking-[0.12em] text-ink-mute">
+        <p className="mb-2 font-mono text-[10px] tracking-[0.12em] text-ink-sub">
           12桁の鍵を入力
         </p>
-        <div className="rounded-xl border border-rule-soft bg-white px-4 py-3.5">
+        <div className="rounded-xl border border-line bg-white px-4 py-3.5">
           <div className="flex items-center justify-center gap-2" onPaste={handlePaste}>
-            <span className="font-mono text-[12px] text-stamp">SB-</span>
+            <span className="font-mono text-[12px] text-brand">SB-</span>
             {digits.map((d, i) => (
               <span key={i} className="flex items-center gap-2">
                 <input
@@ -121,9 +121,9 @@ export default function KeyRestoreInputPage() {
                   onChange={(e) => handleDigitChange(i, e.target.value)}
                   placeholder="0000"
                   aria-label={`鍵 ${i + 1}番目の4桁`}
-                  className="h-10 w-[56px] rounded border border-rule bg-paper text-center font-mono text-[16px] tracking-widest text-ink outline-none focus:border-stamp"
+                  className="h-10 w-[56px] rounded border border-line bg-canvas text-center font-mono text-[16px] tracking-widest text-ink outline-none focus:border-brand"
                 />
-                {i < 2 && <span className="text-ink-mute">-</span>}
+                {i < 2 && <span className="text-ink-sub">-</span>}
               </span>
             ))}
           </div>
@@ -135,7 +135,7 @@ export default function KeyRestoreInputPage() {
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5">
           <p className="text-[12.5px] text-red-700">{error}</p>
           {error.includes("打ち間違い") && (
-            <button type="button" onClick={handleRestore} className="mt-1.5 text-[11px] font-semibold text-stamp underline">
+            <button type="button" onClick={handleRestore} className="mt-1.5 text-[11px] font-semibold text-brand underline">
               再試行
             </button>
           )}
@@ -143,19 +143,19 @@ export default function KeyRestoreInputPage() {
       )}
 
       {/* CTA */}
-      <div className="fixed inset-x-0 bottom-0 mx-auto w-full max-w-[480px] px-5 pb-8 pt-4 bg-paper/90 backdrop-blur-sm">
+      <div className="fixed inset-x-0 bottom-0 mx-auto w-full max-w-[480px] px-5 pb-8 pt-4 bg-canvas/90 backdrop-blur-sm">
         <button
           type="button"
           onClick={handleRestore}
           disabled={!code || loading}
-          className="block w-full rounded-xl bg-stamp py-3.5 text-center text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(184,122,44,0.3)] disabled:opacity-40"
+          className="block w-full rounded-xl bg-brand py-3.5 text-center text-[14px] font-bold text-white shadow-[0_4px_12px_rgba(26,122,53,0.3)] disabled:opacity-40"
         >
           {loading ? "確認中…" : "記録を戻す →"}
         </button>
         <button
           type="button"
           onClick={() => setShowLostModal(true)}
-          className="mt-3 block w-full text-center text-[11px] text-ink-mute underline decoration-dotted"
+          className="mt-3 block w-full text-center text-[11px] text-ink-sub underline decoration-dotted"
         >
           鍵をなくしてしまった？
         </button>
@@ -166,14 +166,14 @@ export default function KeyRestoreInputPage() {
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/30 px-4 pb-8">
           <div className="w-full max-w-[440px] rounded-2xl bg-white p-5 shadow-xl">
             <p className="mb-2 text-[15px] font-bold text-ink">鍵をなくしてしまった場合</p>
-            <p className="mb-5 text-[12.5px] leading-relaxed text-ink-mute">
+            <p className="mb-5 text-[12.5px] leading-relaxed text-ink-sub">
               サーバーには鍵を保管していないため、復元できません。
               新しく試合を始めてください。
             </p>
             <button
               type="button"
               onClick={() => setShowLostModal(false)}
-              className="w-full rounded-lg border border-rule py-2.5 text-[13px] font-semibold text-ink"
+              className="w-full rounded-lg border border-line py-2.5 text-[13px] font-semibold text-ink"
             >
               閉じる
             </button>

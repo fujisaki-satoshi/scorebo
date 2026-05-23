@@ -12,7 +12,7 @@ import type { SaveMethods } from "@/lib/keys-client";
 function KeyStamp({ char = "鍵" }: { char?: string }) {
   return (
     <div
-      className="flex h-10 w-10 items-center justify-center rounded-full bg-stamp-soft text-[18px] font-serif font-bold text-stamp"
+      className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-light text-[18px] font-sans font-bold text-brand"
       style={{ transform: "rotate(-12deg)" }}
       aria-hidden="true"
     >
@@ -25,12 +25,12 @@ function CodeDisplay({ code }: { code: string }) {
   const parts = code.split("-");
   return (
     <div className="flex items-center justify-center gap-0.5 font-mono text-[24px] font-medium tracking-[0.04em]">
-      <span className="text-[16px] text-stamp">SB</span>
-      <span className="text-ink-mute">-</span>
+      <span className="text-[16px] text-brand">SB</span>
+      <span className="text-ink-sub">-</span>
       <span className="text-ink">{parts[1]}</span>
-      <span className="text-ink-mute">-</span>
+      <span className="text-ink-sub">-</span>
       <span className="text-ink">{parts[2]}</span>
-      <span className="text-ink-mute">-</span>
+      <span className="text-ink-sub">-</span>
       <span className="text-ink">{parts[3]}</span>
     </div>
   );
@@ -148,7 +148,7 @@ export default function KeyDisplayPage() {
     router.push("/games");
   }
 
-  if (!code) return <div className="flex min-h-screen items-center justify-center bg-paper text-[13px] text-ink-mute">読み込み中…</div>;
+  if (!code) return <div className="flex min-h-screen items-center justify-center bg-canvas text-[13px] text-ink-sub">読み込み中…</div>;
 
   const today = new Date();
   const dateStr = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, "0")}.${String(today.getDate()).padStart(2, "0")}`;
@@ -156,42 +156,42 @@ export default function KeyDisplayPage() {
   const timeStr = `${String(today.getHours()).padStart(2, "0")}:${String(today.getMinutes()).padStart(2, "0")}`;
 
   return (
-    <div className="relative min-h-screen bg-paper px-5 pt-4 pb-40">
+    <div className="relative min-h-screen bg-canvas px-5 pt-4 pb-40">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <Link href="/keys/new" className="flex items-center gap-1 text-[13px] text-ink-mute">
+        <Link href="/keys/new" className="flex items-center gap-1 text-[13px] text-ink-sub">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           戻る
         </Link>
-        <span className="font-mono text-[10px] tracking-[0.16em] text-stamp">STEP 2 / 2</span>
+        <span className="font-mono text-[10px] tracking-[0.16em] text-brand">STEP 2 / 2</span>
       </div>
 
       {/* Key Certificate Card */}
       <div
         ref={cardRef}
-        className="relative mb-6 rounded-xl border-[1.5px] border-stamp bg-white px-[18px] py-[16px] shadow-[0_10px_24px_-16px_rgba(80,40,10,.4)]"
+        className="relative mb-6 rounded-xl border-[1.5px] border-brand bg-white px-[18px] py-[16px] shadow-[0_10px_24px_-16px_rgba(80,40,10,.4)]"
       >
         {/* Stamp */}
         <div className="absolute top-3 right-3">
           <KeyStamp />
         </div>
 
-        <p className="mb-1 font-mono text-[9.5px] tracking-[0.16em] text-stamp">
+        <p className="mb-1 font-mono text-[9.5px] tracking-[0.16em] text-brand">
           SCOREBO · 復元の鍵
         </p>
-        <p className="font-serif text-[16px] font-bold text-ink">あなただけの鍵</p>
-        <p className="mt-0.5 font-mono text-[9px] text-ink-mute">
+        <p className="font-sans text-[16px] font-bold text-ink">あなただけの鍵</p>
+        <p className="mt-0.5 font-mono text-[9px] text-ink-sub">
           ISSUED · {dateStr} ({dayNames[today.getDay()]}) {timeStr}
         </p>
 
-        <div className="my-4 border-t border-dashed border-rule" />
+        <div className="my-4 border-t border-dashed border-line" />
 
         <CodeDisplay code={code} />
 
-        <div className="my-4 border-t border-dashed border-rule" />
+        <div className="my-4 border-t border-dashed border-line" />
 
         <div className="flex justify-center">
-          <div className="rounded border border-rule-soft p-1.5">
+          <div className="rounded border border-line p-1.5">
             <QRCodeSVG value={code} size={120} aria-label={`QRコード: ${code}`} />
           </div>
         </div>
@@ -212,7 +212,7 @@ export default function KeyDisplayPage() {
 
       {/* Save options */}
       <div className="mb-4">
-        <p className="mb-1 font-mono text-[9.5px] tracking-[0.16em] text-stamp-deep">
+        <p className="mb-1 font-mono text-[9.5px] tracking-[0.16em] text-brand-dark">
           鍵を保存する · 1つ以上選んでください
         </p>
         <div className="flex flex-col gap-1.5">
@@ -225,18 +225,18 @@ export default function KeyDisplayPage() {
                 onClick={() => handleSaveOption(opt)}
                 className={`grid grid-cols-[32px_1fr_22px] items-center gap-2 rounded-lg border px-3 py-2.5 text-left transition-colors ${
                   checked
-                    ? "border-stamp bg-paper-warm"
-                    : "border-rule-soft bg-white"
+                    ? "border-brand bg-brand-light"
+                    : "border-line bg-white"
                 }`}
               >
                 <span className="text-[18px]">{opt.icon}</span>
                 <span>
                   <span className="block text-[12.5px] font-semibold text-ink">{opt.label}</span>
-                  <span className="block text-[10px] text-ink-mute">{opt.sub}</span>
+                  <span className="block text-[10px] text-ink-sub">{opt.sub}</span>
                 </span>
                 <span
                   className={`flex h-5 w-5 items-center justify-center rounded-full border-2 text-[10px] ${
-                    checked ? "border-stamp bg-stamp text-white" : "border-rule"
+                    checked ? "border-brand bg-brand text-white" : "border-line"
                   }`}
                 >
                   {checked && "✓"}
@@ -260,14 +260,14 @@ export default function KeyDisplayPage() {
               <button
                 type="button"
                 onClick={() => setShowSaveWarning(false)}
-                className="flex-1 rounded-lg border border-rule py-2.5 text-[13px] font-semibold text-ink"
+                className="flex-1 rounded-lg border border-line py-2.5 text-[13px] font-semibold text-ink"
               >
                 保存する
               </button>
               <button
                 type="button"
                 onClick={handleForceFinish}
-                className="flex-1 rounded-lg bg-stamp py-2.5 text-[13px] font-bold text-white"
+                className="flex-1 rounded-lg bg-brand py-2.5 text-[13px] font-bold text-white"
               >
                 このまま進む
               </button>
@@ -277,7 +277,7 @@ export default function KeyDisplayPage() {
       )}
 
       {/* CTA */}
-      <div className="fixed inset-x-0 bottom-0 mx-auto w-full max-w-[480px] bg-paper/90 px-5 pb-8 pt-4 backdrop-blur-sm">
+      <div className="fixed inset-x-0 bottom-0 mx-auto w-full max-w-[480px] bg-canvas/90 px-5 pb-8 pt-4 backdrop-blur-sm">
         {!hasSaved && (
           <p className="mb-2 text-center text-[11px] text-red-500">
             鍵をまだ保存していません
