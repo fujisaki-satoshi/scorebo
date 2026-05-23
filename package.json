@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "capture-screens": "node --env-file=.env.local scripts/capture-landing-screens.mjs",
+    "export-profile": "node --env-file=.env.local scripts/export-profile-png.mjs",
+    "record-demo": "node --env-file=.env.local scripts/record-demo.mjs",
+    "reset-with-sample": "node --env-file=.env.local scripts/reset-with-sample.mjs",
+    "seed-games": "node --env-file=.env.local scripts/seed-games.mjs",
+    "deploy:firestore": "npx firebase-tools deploy --only firestore"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
