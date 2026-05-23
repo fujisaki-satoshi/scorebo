@@ -107,8 +107,11 @@ export default function NewGamePage() {
           </div>
         </FieldCard>
 
-        <div className="grid grid-cols-[1.4fr_1fr] gap-2.5">
-          <FieldCard label="試合日" required>
+        <div className="mb-3.5 flex gap-2.5">
+          <div className="min-w-0 flex-[1.4] overflow-hidden rounded-2xl border border-line bg-card px-4 py-3.5">
+            <div className="mb-2.5 text-[12px] font-semibold tracking-[0.04em] text-ink-sub">
+              試合日<span className="ml-0.5 text-[#c0392b]">*</span>
+            </div>
             <input
               type="date"
               value={date}
@@ -116,8 +119,11 @@ export default function NewGamePage() {
               required
               className="w-full rounded-xl border border-line bg-canvas px-3 py-3 text-base text-ink outline-none focus:border-brand focus:bg-card focus:shadow-[0_0_0_3px_var(--color-brand-light)]"
             />
-          </FieldCard>
-          <FieldCard label="回数(最大)">
+          </div>
+          <div className="flex-1 rounded-2xl border border-line bg-card px-4 py-3.5">
+            <div className="mb-2.5 text-[12px] font-semibold tracking-[0.04em] text-ink-sub">
+              回数(最大)
+            </div>
             <InningsStepper
               value={maxInnings}
               onChange={(n) => {
@@ -125,7 +131,7 @@ export default function NewGamePage() {
                 setMaxInningsTouched(true);
               }}
             />
-          </FieldCard>
+          </div>
         </div>
 
         <FieldCard label="場所・グラウンド名">

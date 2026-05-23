@@ -132,13 +132,15 @@ export function EditSheet({ game, onClose }: { game: Game; onClose: () => void }
           </div>
         </div>
 
-        <div className="grid grid-cols-[1.4fr_1fr] gap-2.5">
-          <FieldGroup label="試合日">
+        <div className="mb-3 flex gap-2.5">
+          <div className="min-w-0 flex-[1.4] overflow-hidden">
+            <label className="mb-1.5 block text-xs font-semibold text-ink-sub">試合日</label>
             <SheetInput type="date" value={date} onChange={setDate} />
-          </FieldGroup>
-          <FieldGroup label="回数(最大)">
+          </div>
+          <div className="flex-1">
+            <label className="mb-1.5 block text-xs font-semibold text-ink-sub">回数(最大)</label>
             <InningsStepper value={maxInnings} onChange={setMaxInnings} size="sm" />
-          </FieldGroup>
+          </div>
         </div>
 
         <FieldGroup label="場所・グラウンド名">
