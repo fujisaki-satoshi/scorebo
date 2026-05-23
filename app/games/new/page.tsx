@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { InningsStepper } from "@/app/_components/InningsStepper";
 import { SportIcon } from "@/app/_components/SportIcon";
 import { track } from "@/lib/analytics";
 import { useAnonymousAuth } from "@/lib/auth";
 import { createGame } from "@/lib/games";
-import { checkCreateRateLimit, RateLimitError, recordCreate } from "@/lib/rate-limit";
+import { RateLimitError, withCreateRateLimit } from "@/lib/rate-limit";
 import { SPORT_META, SPORT_ORDER } from "@/lib/sports";
 import type { Sport } from "@/lib/types";
 
@@ -48,22 +49,23 @@ export default function NewGamePage() {
     setSubmitting(true);
     setError(null);
     try {
-      checkCreateRateLimit();
-      const id = await createGame({
-        sport,
-        date,
-        max_innings: maxInnings,
-        location: location.trim(),
-        team_top: teamTop.trim(),
-        team_bottom: teamBottom.trim(),
-      }, authUser?.uid);
-      recordCreate();
+      const id = await withCreateRateLimit(() =>
+        createGame(
+          {
+            sport,
+            date,
+            max_innings: maxInnings,
+            location: location.trim(),
+            team_top: teamTop.trim(),
+            team_bottom: teamBottom.trim(),
+          },
+          authUser?.uid,
+        ),
+      );
       track("game_created", { sport, max_innings: maxInnings });
       router.push(`/games/${id}`);
     } catch (e) {
-      setError(
-        e instanceof RateLimitError ? e.message : (e as Error).message,
-      );
+      setError(e instanceof RateLimitError ? e.message : (e as Error).message);
       setSubmitting(false);
     }
   }
@@ -76,16 +78,7 @@ export default function NewGamePage() {
           className="flex items-center gap-1 px-1 py-1 text-sm font-medium text-brand"
           aria-label="戻る"
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
             <path d="m15 18-6-6 6-6" />
           </svg>
           もどる
@@ -121,7 +114,7 @@ export default function NewGamePage() {
               value={date}
               onChange={(e) => setDate(e.target.value)}
               required
-              className="w-full appearance-none rounded-xl border border-line bg-canvas px-3 py-3 text-base text-ink outline-none focus:border-brand focus:bg-card focus:shadow-[0_0_0_3px_var(--color-brand-light)]"
+              className="w-full rounded-xl border border-line bg-canvas px-3 py-3 text-base text-ink outline-none focus:border-brand focus:bg-card focus:shadow-[0_0_0_3px_var(--color-brand-light)]"
             />
           </FieldCard>
           <FieldCard label="回数(最大)">
@@ -195,41 +188,6 @@ function FieldCard({
         {required && <span className="ml-0.5 text-[#c0392b]">*</span>}
       </div>
       {children}
-    </div>
-  );
-}
-
-function InningsStepper({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (n: number) => void;
-}) {
-  const min = 1;
-  const max = 9;
-  const safe = Math.min(max, Math.max(min, value || min));
-  return (
-    <div className="flex items-center justify-between rounded-xl border border-line bg-canvas px-2 py-1.5">
-      <button
-        type="button"
-        onClick={() => onChange(Math.max(min, safe - 1))}
-        disabled={safe <= min}
-        className="flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-brand bg-card text-lg font-bold leading-none text-brand active:bg-brand-light disabled:cursor-not-allowed disabled:border-line disabled:text-[#ccc]"
-        aria-label="-1"
-      >
-        −
-      </button>
-      <span className="text-[20px] font-bold tabular-nums">{safe}</span>
-      <button
-        type="button"
-        onClick={() => onChange(Math.min(max, safe + 1))}
-        disabled={safe >= max}
-        className="flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-brand bg-card text-lg font-bold leading-none text-brand active:bg-brand-light disabled:cursor-not-allowed disabled:border-line disabled:text-[#ccc]"
-        aria-label="+1"
-      >
-        ＋
-      </button>
     </div>
   );
 }

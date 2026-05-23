@@ -30,7 +30,7 @@ export class RateLimitError extends Error {
   }
 }
 
-export function checkCreateRateLimit() {
+function checkCreateRateLimit() {
   const now = Date.now();
   const recent = readHistory().filter((t) => now - t < WINDOW_MS);
   if (recent.length >= MAX_PER_WINDOW) {
@@ -39,9 +39,16 @@ export function checkCreateRateLimit() {
   }
 }
 
-export function recordCreate() {
+function recordCreate() {
   const now = Date.now();
   const recent = readHistory().filter((t) => now - t < WINDOW_MS);
   recent.push(now);
   writeHistory(recent);
+}
+
+export async function withCreateRateLimit<T>(fn: () => Promise<T>): Promise<T> {
+  checkCreateRateLimit();
+  const result = await fn();
+  recordCreate();
+  return result;
 }

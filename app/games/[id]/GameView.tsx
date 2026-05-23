@@ -2,34 +2,28 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { QRCodeCanvas } from "qrcode.react";
 import { useCallback, useEffect, useState } from "react";
 
-import { SportIcon } from "@/app/_components/SportIcon";
+import { GameHero } from "@/app/_components/GameHero";
+import { ScoreTable } from "@/app/_components/ScoreTable";
 import { track } from "@/lib/analytics";
-import { formatGameDate, formatGameDateFull } from "@/lib/dates";
 import {
   currentInning,
-  deleteGame,
   findInning,
+  getPillStatus,
   hasAnyScore,
   setInning,
-  totalSlots,
   totals,
-  updateGameMeta,
   updateInnings,
   updateStatus,
   watchGame,
 } from "@/lib/games";
-import { SPORT_META, SPORT_ORDER } from "@/lib/sports";
-import type { Game, Sport } from "@/lib/types";
+import type { Game } from "@/lib/types";
+import { DeleteDialog } from "./_components/DeleteDialog";
+import { EditSheet } from "./_components/EditSheet";
+import { ShareModal } from "./_components/ShareModal";
 
 type Modal = "share" | "edit" | "delete" | null;
-
-function teamShort(name: string): string {
-  if (!name) return "—";
-  return name.length > 12 ? name.slice(0, 12) + "…" : name;
-}
 
 export function GameView({ id }: { id: string }) {
   const router = useRouter();
@@ -104,24 +98,9 @@ export function GameView({ id }: { id: string }) {
     );
   }
 
-  const slots = totalSlots(game.innings, game.max_innings);
   const { top, bottom } = totals(game.innings);
-  const live = game.status === "in_progress" && hasAnyScore(game.innings);
-  const cur = currentInning(game.innings, game.max_innings);
-  const meta = SPORT_META[game.sport];
-
-  let pillText: string;
-  let pillVariant: "live" | "done" | "scheduled";
-  if (game.status === "completed") {
-    pillText = "終了";
-    pillVariant = "done";
-  } else if (live) {
-    pillText = `進行中 ${cur}回`;
-    pillVariant = "live";
-  } else {
-    pillText = "予定";
-    pillVariant = "scheduled";
-  }
+  const { pillText, pillVariant } = getPillStatus(game.innings, game.max_innings, game.status);
+  const slots = Math.max(game.max_innings, game.innings.reduce((m, s) => Math.max(m, s.inning), 0));
 
   async function handleSaveInning() {
     if (!game || editingInning === null) return;
@@ -131,7 +110,6 @@ export function GameView({ id }: { id: string }) {
       const nextInnings = setInning(game.innings, editingInning, localTop, localBottom);
       await updateInnings(game.id, nextInnings);
       track("inning_saved", { sport: game.sport, inning: editingInning });
-      // advance edit cursor to next incomplete inning
       const advance = currentInning(nextInnings, game.max_innings);
       setEditingInning(advance);
       const slot = findInning(nextInnings, advance);
@@ -168,16 +146,7 @@ export function GameView({ id }: { id: string }) {
           href="/games"
           className="inline-flex items-center gap-0.5 px-1 py-1.5 text-sm font-medium text-brand"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
             <path d="m15 18-6-6 6-6" />
           </svg>
           一覧
@@ -191,16 +160,7 @@ export function GameView({ id }: { id: string }) {
           }}
           className="inline-flex items-center gap-1 rounded-full bg-brand-light px-3 py-1.5 text-[13px] font-semibold text-brand-dark"
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
           </svg>
@@ -212,16 +172,7 @@ export function GameView({ id }: { id: string }) {
           className="ml-0.5 flex h-9 w-9 items-center justify-center rounded-full text-ink-sub hover:bg-canvas"
           aria-label="メニュー"
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="5" r="0.6" />
             <circle cx="12" cy="12" r="0.6" />
             <circle cx="12" cy="19" r="0.6" />
@@ -238,20 +189,14 @@ export function GameView({ id }: { id: string }) {
             <div className="absolute right-3 top-12 z-20 w-48 overflow-hidden rounded-xl border border-line bg-card shadow-lg">
               <button
                 type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  setModal("edit");
-                }}
+                onClick={() => { setMenuOpen(false); setModal("edit"); }}
                 className="block w-full px-4 py-3 text-left text-sm hover:bg-canvas"
               >
                 試合情報を編集
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  setModal("delete");
-                }}
+                onClick={() => { setMenuOpen(false); setModal("delete"); }}
                 className="block w-full border-t border-line px-4 py-3 text-left text-sm text-live hover:bg-canvas"
               >
                 この試合を削除
@@ -261,95 +206,25 @@ export function GameView({ id }: { id: string }) {
         )}
       </header>
 
-      <section className="bg-gradient-to-b from-brand to-brand-dark px-[18px] pt-3.5 pb-[18px] landscape:py-3 landscape:px-4 text-white">
-        <div className="landscape:hidden">
-        <div className="mb-3 flex items-center gap-2 text-[12px] opacity-95">
-          <SportIcon sport={game.sport} size={14} />
-          <span>{meta.label}</span>
-          <span>·</span>
-          <span>{formatGameDate(game.date)}</span>
-          {game.location && (
-            <>
-              <span>·</span>
-              <span className="truncate">{game.location}</span>
-            </>
-          )}
-        </div>
-
-        <div className="mb-2 grid grid-cols-[1fr_auto_1fr] items-center gap-3.5">
-          <div className="flex flex-col items-center text-center">
-            <div className="text-[18px] font-bold leading-tight">{game.team_top || "—"}</div>
-            <div className="mt-0.5 text-[11px] opacity-90">先攻</div>
-          </div>
-          <div className="self-center text-[28px] font-light leading-none opacity-50">vs</div>
-          <div className="flex flex-col items-center text-center">
-            <div className="text-[18px] font-bold leading-tight">{game.team_bottom || "—"}</div>
-            <div className="mt-0.5 text-[11px] opacity-90">後攻</div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3.5">
-          <div className="text-center text-[68px] font-extrabold leading-none tabular-nums drop-shadow-sm">
-            {top}
-          </div>
-          <div className="text-center text-4xl font-light opacity-50">−</div>
-          <div className="text-center text-[68px] font-extrabold leading-none tabular-nums drop-shadow-sm">
-            {bottom}
-          </div>
-        </div>
-
-        <div className="mt-3.5 text-center">
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-semibold ${
-              pillVariant === "live"
-                ? "bg-black/25"
-                : pillVariant === "done"
-                  ? "bg-white/20"
-                  : "bg-black/20"
-            }`}
-          >
-            {pillVariant === "live" && <span className="pulse-dot">●</span>}
-            {pillText}
-          </span>
-        </div>
-        </div>
-        <div className="hidden landscape:flex items-center gap-4 py-0.5">
-          <div className="min-w-0 flex-1">
-            <div className="text-[11px] opacity-75">先攻</div>
-            <div className="truncate text-[15px] font-bold leading-tight">{game.team_top || "—"}</div>
-          </div>
-          <div className="flex shrink-0 items-center gap-3 tabular-nums">
-            <span className="text-[48px] font-extrabold leading-none drop-shadow-sm">{top}</span>
-            <span className="text-xl font-light opacity-50">−</span>
-            <span className="text-[48px] font-extrabold leading-none drop-shadow-sm">{bottom}</span>
-          </div>
-          <div className="min-w-0 flex-1 text-right">
-            <div className="text-[11px] opacity-75">後攻</div>
-            <div className="truncate text-[15px] font-bold leading-tight">{game.team_bottom || "—"}</div>
-          </div>
-          <span
-            className={`ml-1 inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-              pillVariant === "live"
-                ? "bg-black/25"
-                : pillVariant === "done"
-                  ? "bg-white/20"
-                  : "bg-black/20"
-            }`}
-          >
-            {pillVariant === "live" && <span className="pulse-dot">●</span>}
-            {pillText}
-          </span>
-        </div>
-      </section>
+      <GameHero
+        sport={game.sport}
+        date={game.date}
+        location={game.location}
+        teamTop={game.team_top}
+        teamBottom={game.team_bottom}
+        top={top}
+        bottom={bottom}
+        pillText={pillText}
+        pillVariant={pillVariant}
+      />
 
       <div className="px-4 pt-3.5">
         <ScoreTable
           innings={game.innings}
           maxInnings={game.max_innings}
-          slots={slots}
-          editingInning={editingInning}
           teamTop={game.team_top}
           teamBottom={game.team_bottom}
+          highlightInning={editingInning}
           onPickInning={switchInning}
           totals={{ top, bottom }}
         />
@@ -357,17 +232,7 @@ export function GameView({ id }: { id: string }) {
 
       <div className="mx-4 mt-3.5 rounded-2xl border border-line bg-card px-4 py-3.5">
         <div className="mb-3 flex items-center gap-1.5 text-[13px] font-semibold text-ink">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-brand"
-          >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-brand">
             <path d="M12 20h9" />
             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
           </svg>
@@ -401,16 +266,7 @@ export function GameView({ id }: { id: string }) {
           disabled={saving}
           className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-4 text-base font-bold text-white active:bg-brand-dark disabled:opacity-50"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
             <path d="M17 21v-8H7v8M7 3v5h8" />
           </svg>
@@ -453,164 +309,12 @@ export function GameView({ id }: { id: string }) {
         </Link>
       </div>
 
-      {modal === "share" && (
-        <ShareModal game={game} onClose={() => setModal(null)} />
-      )}
-      {modal === "edit" && (
-        <EditSheet game={game} onClose={() => setModal(null)} />
-      )}
+      {modal === "share" && <ShareModal game={game} onClose={() => setModal(null)} />}
+      {modal === "edit" && <EditSheet game={game} onClose={() => setModal(null)} />}
       {modal === "delete" && (
-        <DeleteDialog
-          game={game}
-          onClose={() => setModal(null)}
-          onDeleted={() => router.replace("/")}
-        />
+        <DeleteDialog game={game} onClose={() => setModal(null)} onDeleted={() => router.replace("/")} />
       )}
     </>
-  );
-}
-
-function ScoreTable({
-  innings,
-  maxInnings,
-  slots,
-  editingInning,
-  teamTop,
-  teamBottom,
-  onPickInning,
-  totals,
-}: {
-  innings: Game["innings"];
-  maxInnings: number;
-  slots: number;
-  editingInning: number;
-  teamTop: string;
-  teamBottom: string;
-  onPickInning: (n: number) => void;
-  totals: { top: number; bottom: number };
-}) {
-  const inningNumbers = Array.from({ length: slots }, (_, i) => i + 1);
-
-  return (
-    <div className="overflow-hidden rounded-xl border border-line bg-card">
-      <table className="w-full table-fixed border-separate border-spacing-0 text-center text-[13px] tabular-nums">
-        <colgroup>
-          <col style={{ width: 120 }} />
-          {inningNumbers.map((n) => (
-            <col key={n} />
-          ))}
-          <col style={{ width: 36 }} />
-        </colgroup>
-        <thead>
-          <tr>
-            <th className="border-b border-r border-line bg-canvas py-2.5 px-2 text-left text-[12px] font-semibold text-ink-sub">
-              チーム
-            </th>
-            {inningNumbers.map((n) => (
-              <th
-                key={n}
-                className={`border-b border-r border-line bg-canvas py-2.5 text-[12px] font-semibold text-ink-sub ${
-                  n === editingInning
-                    ? "bg-accent-soft shadow-[inset_0_0_0_1.5px_var(--color-accent)]"
-                    : n > maxInnings
-                      ? "text-brand-dark"
-                      : ""
-                }`}
-              >
-                {n}
-              </th>
-            ))}
-            <th className="border-b border-line bg-brand-light py-2.5 text-[12px] font-bold text-brand-dark">
-              計
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <ScoreRow
-            label={teamShort(teamTop)}
-            innings={innings}
-            slots={slots}
-            getValue={(s) => s?.top}
-            editingInning={editingInning}
-            maxInnings={maxInnings}
-            onPickInning={onPickInning}
-            total={totals.top}
-            isLast={false}
-          />
-          <ScoreRow
-            label={teamShort(teamBottom)}
-            innings={innings}
-            slots={slots}
-            getValue={(s) => s?.bottom}
-            editingInning={editingInning}
-            maxInnings={maxInnings}
-            onPickInning={onPickInning}
-            total={totals.bottom}
-            isLast
-          />
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function ScoreRow({
-  label,
-  innings,
-  slots,
-  getValue,
-  editingInning,
-  maxInnings,
-  onPickInning,
-  total,
-  isLast,
-}: {
-  label: string;
-  innings: Game["innings"];
-  slots: number;
-  getValue: (s: Game["innings"][number] | undefined) => number | null | undefined;
-  editingInning: number;
-  maxInnings: number;
-  onPickInning: (n: number) => void;
-  total: number;
-  isLast: boolean;
-}) {
-  const inningNumbers = Array.from({ length: slots }, (_, i) => i + 1);
-  const bottomBorder = isLast ? "" : "border-b";
-  return (
-    <tr>
-      <td
-        className={`${bottomBorder} border-r-[1.5px] border-line bg-[#fafcfa] py-2.5 pl-2.5 text-left text-[13px] font-semibold`}
-      >
-        {label}
-      </td>
-      {inningNumbers.map((n) => {
-        const slot = findInning(innings, n);
-        const value = getValue(slot);
-        const isActive = n === editingInning;
-        const isExtra = n > maxInnings;
-        return (
-          <td
-            key={n}
-            onClick={() => onPickInning(n)}
-            className={`${bottomBorder} cursor-pointer border-r border-line py-2.5 text-[14px] ${
-              isActive
-                ? "bg-accent-soft shadow-[inset_0_0_0_1.5px_var(--color-accent)]"
-                : isExtra
-                  ? "bg-brand-light/50"
-                  : "hover:bg-brand-light"
-            } ${value == null ? "text-[#c9c9c9]" : ""}`}
-          >
-            {value == null ? "−" : value}
-          </td>
-        );
-      })}
-      <td
-        className={`${bottomBorder} bg-brand-light py-2.5 text-[14px] font-bold text-brand-dark`}
-      >
-        {total}
-      </td>
-    </tr>
   );
 }
 
@@ -650,593 +354,6 @@ function StepperRow({
         >
           ＋
         </button>
-      </div>
-    </div>
-  );
-}
-
-function ShareModal({ game, onClose }: { game: Game; onClose: () => void }) {
-  const [editUrl, setEditUrl] = useState("");
-  const [viewUrl, setViewUrl] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [shareMode, setShareMode] = useState<"view" | "edit">("view");
-  const [copied, setCopied] = useState(false);
-  const [canNativeShare, setCanNativeShare] = useState(false);
-  const [sharing, setSharing] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [imgError, setImgError] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const origin = window.location.origin;
-    setEditUrl(`${origin}/games/${game.id}`);
-    if (game.view_token) {
-      setViewUrl(`${origin}/watch/${game.view_token}`);
-    }
-    const v = game.updated_at?.toMillis?.() ?? game.created_at?.toMillis?.() ?? Date.now();
-    setImageUrl(`${origin}/games/${game.id}/opengraph-image?v=${v}`);
-    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-      setCanNativeShare(true);
-    }
-  }, [game.id, game.view_token, game.updated_at, game.created_at]);
-
-  const hasViewUrl = !!viewUrl;
-  const activeUrl = shareMode === "edit" ? editUrl : (viewUrl || editUrl);
-  const dateText = formatGameDateFull(game.date);
-  const shareTitle = `${game.team_top} vs ${game.team_bottom} のスコア`;
-  const shareText = `${shareTitle}\n${dateText}\n${activeUrl}`;
-
-  async function handleCopy() {
-    if (!activeUrl) return;
-    try {
-      await navigator.clipboard.writeText(
-        shareMode === "edit" ? editUrl : shareText,
-      );
-      setCopied(true);
-      track("qr_share_copy", { sport: game.sport, mode: shareMode });
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // ignore
-    }
-  }
-
-  async function handleNativeShare() {
-    if (!activeUrl || sharing) return;
-    setSharing(true);
-    try {
-      let file: File | null = null;
-      try {
-        const res = await fetch(imageUrl);
-        if (res.ok) {
-          const blob = await res.blob();
-          file = new File([blob], `scorebo-${game.id}.png`, { type: blob.type || "image/png" });
-        }
-      } catch {
-        // proceed without file
-      }
-
-      const canShareFiles =
-        file != null &&
-        typeof navigator.canShare === "function" &&
-        navigator.canShare({ files: [file] });
-
-      if (canShareFiles && file) {
-        await navigator.share({ title: shareTitle, text: shareText, url: activeUrl, files: [file] });
-        track("qr_share_native", { sport: game.sport, with_image: true });
-      } else {
-        await navigator.share({ title: shareTitle, text: shareText, url: activeUrl });
-        track("qr_share_native", { sport: game.sport, with_image: false });
-      }
-    } catch (e) {
-      if ((e as Error).name !== "AbortError") {
-        console.error(e);
-      }
-    } finally {
-      setSharing(false);
-    }
-  }
-
-  const lineHref = activeUrl
-    ? `https://line.me/R/msg/text/?${encodeURIComponent(shareText)}`
-    : "#";
-
-  return (
-    <div className="fixed inset-0 z-30 mx-auto w-full max-w-[480px] landscape:max-w-[900px] bg-black/50 p-4 landscape:flex landscape:items-center landscape:justify-center">
-      <div className="absolute inset-x-4 top-6 bottom-4 overflow-y-auto rounded-2xl bg-card p-5 landscape:static landscape:inset-auto landscape:w-full landscape:max-w-[440px] landscape:max-h-[85vh]">
-        <div className="mb-3.5 flex items-center justify-between">
-          <div className="text-base font-bold">試合をシェア</div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="閉じる"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-canvas text-base text-ink-sub"
-          >
-            ×
-          </button>
-        </div>
-
-        {hasViewUrl && (
-          <div className="mb-3.5 flex gap-1.5 rounded-xl bg-canvas p-1">
-            <button
-              type="button"
-              onClick={() => setShareMode("view")}
-              className={`flex-1 rounded-lg py-1.5 text-[13px] font-semibold transition-colors ${
-                shareMode === "view"
-                  ? "bg-card text-ink shadow-sm"
-                  : "text-ink-sub"
-              }`}
-            >
-              観客・保護者用
-            </button>
-            <button
-              type="button"
-              onClick={() => setShareMode("edit")}
-              className={`flex-1 rounded-lg py-1.5 text-[13px] font-semibold transition-colors ${
-                shareMode === "edit"
-                  ? "bg-card text-ink shadow-sm"
-                  : "text-ink-sub"
-              }`}
-            >
-              スコアラー用
-            </button>
-          </div>
-        )}
-
-        {shareMode === "edit" ? (
-          <>
-            <div className="mb-3.5 rounded-xl border border-live/30 bg-live/5 px-3.5 py-3 text-[12px] leading-relaxed text-live">
-              このURLを知っている人はスコアを編集できます。入力担当者のみに共有してください。
-            </div>
-            <div className="mb-3 flex gap-2">
-              <div className="flex-1 truncate rounded-lg border border-line bg-canvas px-3 py-2.5 text-[12px] text-ink-sub">
-                {editUrl || "URL生成中…"}
-              </div>
-              <button
-                type="button"
-                onClick={handleCopy}
-                disabled={!editUrl}
-                className="shrink-0 rounded-lg border border-brand bg-card px-3.5 text-[13px] font-semibold text-brand disabled:opacity-50"
-              >
-                {copied ? "コピー済" : "コピー"}
-              </button>
-            </div>
-            <div className="text-center">
-              <div className="mb-1.5 text-[11px] text-ink-sub">
-                またはこの場で見せて読み取ってもらう
-              </div>
-              <div className="inline-flex items-center justify-center rounded-lg border border-line bg-white p-2.5">
-                {editUrl ? (
-                  <QRCodeCanvas
-                    value={editUrl}
-                    size={140}
-                    level="M"
-                    marginSize={2}
-                    bgColor="#ffffff"
-                    fgColor="#000000"
-                  />
-                ) : (
-                  <div className="h-[140px] w-[140px]" />
-                )}
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            <div
-              className="relative mb-1.5 overflow-hidden rounded-xl border border-line bg-canvas"
-              style={{ aspectRatio: "1200 / 630" }}
-            >
-              {imageUrl && !imgError && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={imageUrl}
-                  alt={`${shareTitle} のプレビュー`}
-                  className={`h-full w-full object-cover transition-opacity ${imgLoaded ? "opacity-100" : "opacity-0"}`}
-                  onLoad={() => setImgLoaded(true)}
-                  onError={() => setImgError(true)}
-                />
-              )}
-              {!imgLoaded && !imgError && (
-                <div className="absolute inset-0 flex items-center justify-center text-[11px] text-ink-sub">
-                  スコア画像を生成中…
-                </div>
-              )}
-              {imgError && (
-                <div className="absolute inset-0 flex items-center justify-center px-4 text-center text-[11px] text-ink-sub">
-                  画像を読み込めませんでした
-                  <br />
-                  URL のみ送信できます
-                </div>
-              )}
-            </div>
-            <div className="mb-3.5 text-center text-[11px] text-ink-sub">
-              ↑ この画像とURLが送られます
-            </div>
-
-            {canNativeShare && (
-              <>
-                <button
-                  type="button"
-                  onClick={handleNativeShare}
-                  disabled={!activeUrl || sharing}
-                  className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-3 py-3.5 text-[15px] font-bold text-white shadow-[0_4px_12px_rgba(26,122,53,0.2)] active:bg-brand-dark disabled:opacity-60"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="18"
-                    height="18"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                    <polyline points="16 6 12 2 8 6" />
-                    <line x1="12" y1="2" x2="12" y2="15" />
-                  </svg>
-                  {sharing ? "共有を準備中…" : "みんなに送る"}
-                </button>
-
-                <div className="my-2.5 flex items-center gap-2 text-[11px] text-ink-sub before:h-px before:flex-1 before:bg-line after:h-px after:flex-1 after:bg-line">
-                  個別に送る
-                </div>
-              </>
-            )}
-
-            <a
-              href={lineHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => track("qr_share_line", { sport: game.sport })}
-              className={`mb-2 flex items-center justify-center gap-2 rounded-xl border border-line-green bg-line-green px-1.5 ${canNativeShare ? "py-3" : "py-3.5 text-[14px]"} text-[14px] font-semibold text-white`}
-            >
-              <svg viewBox="0 0 36 36" className="h-5 w-5">
-                <path
-                  fill="#fff"
-                  d="M18 3C9.16 3 2 8.79 2 15.93c0 6.41 5.81 11.78 13.66 12.79.53.11 1.26.35 1.44.81.17.42.11 1.07.05 1.5l-.23 1.4c-.07.42-.33 1.63 1.42.89 1.75-.74 9.42-5.55 12.85-9.5h-.01C33.55 21.16 35 18.69 35 15.93 35 8.79 27.84 3 18 3z"
-                />
-                <path
-                  fill="#06c755"
-                  d="M14.06 12.66h-1.01a.28.28 0 0 0-.28.28v6.27c0 .15.13.28.28.28h1.01a.28.28 0 0 0 .28-.28v-6.27a.28.28 0 0 0-.28-.28zm6.94 0h-1a.28.28 0 0 0-.28.28v3.73l-2.87-3.88-.02-.03h-1.18a.28.28 0 0 0-.28.28v6.27c0 .15.13.28.28.28h1a.28.28 0 0 0 .28-.28v-3.73l2.88 3.89c.02.03.05.05.08.07h1.11a.28.28 0 0 0 .28-.28v-6.27a.28.28 0 0 0-.28-.28zm-9.4 5.27H8.85v-4.99a.28.28 0 0 0-.28-.28h-1a.28.28 0 0 0-.28.28v6.27c0 .07.03.14.08.19.05.05.12.08.2.08h4.03a.28.28 0 0 0 .28-.28v-1a.28.28 0 0 0-.28-.27zm15.74-3.7a.28.28 0 0 0 .28-.28v-1.01a.28.28 0 0 0-.28-.28h-4.03a.27.27 0 0 0-.19.08.28.28 0 0 0-.08.19v6.26c0 .07.03.14.08.19.05.05.12.08.19.08h4.03a.28.28 0 0 0 .28-.28v-1.01a.28.28 0 0 0-.28-.27h-2.74v-1.06h2.74a.28.28 0 0 0 .28-.28v-1a.28.28 0 0 0-.28-.28h-2.74v-1.06h2.74z"
-                />
-              </svg>
-              LINEで送る
-            </a>
-
-            <div className="mb-1 flex gap-2">
-              <div className="flex-1 truncate rounded-lg border border-line bg-canvas px-3 py-2.5 text-[12px] text-ink-sub">
-                {activeUrl || "URL生成中…"}
-              </div>
-              <button
-                type="button"
-                onClick={handleCopy}
-                disabled={!activeUrl}
-                className="shrink-0 rounded-lg border border-brand bg-card px-3.5 text-[13px] font-semibold text-brand disabled:opacity-50"
-              >
-                {copied ? "コピー済" : "コピー"}
-              </button>
-            </div>
-
-            <div className="mt-4 text-center">
-              <div className="mb-1.5 text-[11px] text-ink-sub">
-                またはこの場で見せて読み取ってもらう
-              </div>
-              <div className="inline-flex items-center justify-center rounded-lg border border-line bg-white p-2.5">
-                {activeUrl ? (
-                  <QRCodeCanvas
-                    value={activeUrl}
-                    size={140}
-                    level="M"
-                    marginSize={2}
-                    bgColor="#ffffff"
-                    fgColor="#000000"
-                  />
-                ) : (
-                  <div className="h-[140px] w-[140px]" />
-                )}
-              </div>
-            </div>
-
-            {!hasViewUrl && (
-              <div className="mt-3.5 text-center text-[10px] text-ink-sub">
-                URLを知っている人は誰でも閲覧・編集できます
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function EditSheet({ game, onClose }: { game: Game; onClose: () => void }) {
-  const [sport, setSport] = useState<Sport>(game.sport);
-  const [date, setDate] = useState(game.date);
-  const [maxInnings, setMaxInnings] = useState(game.max_innings);
-  const [location, setLocation] = useState(game.location);
-  const [teamTop, setTeamTop] = useState(game.team_top);
-  const [teamBottom, setTeamBottom] = useState(game.team_bottom);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSave() {
-    setSaving(true);
-    setError(null);
-    try {
-      await updateGameMeta(game.id, {
-        sport,
-        date,
-        max_innings: maxInnings,
-        location: location.trim(),
-        team_top: teamTop.trim(),
-        team_bottom: teamBottom.trim(),
-      });
-      onClose();
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <div className="fixed inset-0 z-30 mx-auto flex w-full max-w-[480px] landscape:max-w-[900px] items-end justify-center bg-black/50">
-      <button
-        type="button"
-        aria-label="閉じる"
-        onClick={onClose}
-        className="absolute inset-0"
-      />
-      <div className="relative max-h-[92%] w-full overflow-y-auto rounded-t-3xl bg-card px-[18px] pt-3.5 pb-6 landscape:max-w-[480px] landscape:rounded-2xl landscape:max-h-[85vh]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded bg-[#d4d4d4]" />
-        <div className="mb-3.5 flex items-center justify-between">
-          <div className="text-base font-bold">試合情報を編集</div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="閉じる"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-canvas text-base text-ink-sub"
-          >
-            ×
-          </button>
-        </div>
-
-        <div className="mb-3">
-          <label className="mb-1.5 block text-xs font-semibold text-ink-sub">
-            競技種別
-          </label>
-          <div className="grid grid-cols-3 gap-1.5">
-            {SPORT_ORDER.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setSport(s)}
-                className={`rounded-xl border-2 px-1 pt-2.5 pb-2 text-center text-[11px] font-semibold ${
-                  sport === s
-                    ? "border-brand bg-brand-light text-brand-dark"
-                    : "border-line bg-card text-ink"
-                }`}
-              >
-                <SportIcon sport={s} size={28} className="mx-auto mb-0.5 block" />
-                {SPORT_META[s].label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-[1.4fr_1fr] gap-2.5">
-          <FieldGroup label="試合日">
-            <SheetInput type="date" value={date} onChange={(v) => setDate(v)} />
-          </FieldGroup>
-          <FieldGroup label="回数(最大)">
-            <InningsStepper value={maxInnings} onChange={setMaxInnings} />
-          </FieldGroup>
-        </div>
-
-        <FieldGroup label="場所・グラウンド名">
-          <SheetInput type="text" value={location} onChange={(v) => setLocation(v)} />
-        </FieldGroup>
-
-        <div className="mb-3">
-          <label className="mb-1.5 block text-xs font-semibold text-ink-sub">
-            対戦チーム
-          </label>
-          <SheetTeamInput side="先攻" value={teamTop} onChange={setTeamTop} />
-          <SheetTeamInput side="後攻" value={teamBottom} onChange={setTeamBottom} className="mt-2" />
-        </div>
-
-        {error && (
-          <div className="mb-3 rounded-md border border-live/30 bg-live/5 px-3 py-2 text-xs text-live">
-            保存に失敗しました: {error}
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving}
-          className="mt-1.5 block w-full rounded-xl bg-brand py-3.5 text-[15px] font-bold text-white disabled:opacity-50"
-        >
-          {saving ? "保存中…" : "変更を保存"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-3">
-      <label className="mb-1.5 block text-xs font-semibold text-ink-sub">{label}</label>
-      {children}
-    </div>
-  );
-}
-
-function InningsStepper({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (n: number) => void;
-}) {
-  const min = 1;
-  const max = 9;
-  const safe = Math.min(max, Math.max(min, value || min));
-  return (
-    <div className="flex items-center justify-between rounded-xl border border-line bg-canvas px-2 py-1">
-      <button
-        type="button"
-        onClick={() => onChange(Math.max(min, safe - 1))}
-        disabled={safe <= min}
-        className="flex h-8 w-8 items-center justify-center rounded-full border-[1.5px] border-brand bg-card text-base font-bold leading-none text-brand active:bg-brand-light disabled:cursor-not-allowed disabled:border-line disabled:text-[#ccc]"
-        aria-label="-1"
-      >
-        −
-      </button>
-      <span className="text-[18px] font-bold tabular-nums">{safe}</span>
-      <button
-        type="button"
-        onClick={() => onChange(Math.min(max, safe + 1))}
-        disabled={safe >= max}
-        className="flex h-8 w-8 items-center justify-center rounded-full border-[1.5px] border-brand bg-card text-base font-bold leading-none text-brand active:bg-brand-light disabled:cursor-not-allowed disabled:border-line disabled:text-[#ccc]"
-        aria-label="+1"
-      >
-        ＋
-      </button>
-    </div>
-  );
-}
-
-function SheetInput({
-  type,
-  value,
-  onChange,
-}: {
-  type: "text" | "date" | "number";
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <input
-      type={type}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full appearance-none rounded-xl border border-line bg-canvas px-3 py-2.5 text-[15px] outline-none focus:border-brand focus:bg-card focus:shadow-[0_0_0_3px_var(--color-brand-light)]"
-    />
-  );
-}
-
-function SheetTeamInput({
-  side,
-  value,
-  onChange,
-  className,
-}: {
-  side: string;
-  value: string;
-  onChange: (v: string) => void;
-  className?: string;
-}) {
-  return (
-    <div
-      className={`flex items-center rounded-xl border border-line bg-canvas py-0.5 pr-1.5 pl-3 ${className ?? ""}`}
-    >
-      <span className="mr-2 shrink-0 rounded bg-brand-light px-1.5 py-0.5 text-[10px] font-bold text-brand-dark">
-        {side}
-      </span>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="flex-1 border-none bg-transparent py-2.5 text-[15px] outline-none"
-      />
-    </div>
-  );
-}
-
-function DeleteDialog({
-  game,
-  onClose,
-  onDeleted,
-}: {
-  game: Game;
-  onClose: () => void;
-  onDeleted: () => void;
-}) {
-  const [deleting, setDeleting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleDelete() {
-    setDeleting(true);
-    setError(null);
-    try {
-      await deleteGame(game.id);
-      track("game_deleted", { sport: game.sport });
-      onDeleted();
-    } catch (e) {
-      setError((e as Error).message);
-      setDeleting(false);
-    }
-  }
-
-  return (
-    <div className="fixed inset-0 z-30 mx-auto flex w-full max-w-[480px] landscape:max-w-[900px] items-center justify-center bg-black/50 p-5">
-      <button
-        type="button"
-        aria-label="閉じる"
-        onClick={onClose}
-        className="absolute inset-0"
-      />
-      <div className="relative w-full max-w-80 rounded-2xl bg-card px-5 pt-5 pb-4 text-center">
-        <div className="mx-auto mb-2.5 flex h-12 w-12 items-center justify-center rounded-full bg-[#fdecea] text-live">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M3 6h18" />
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
-            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-          </svg>
-        </div>
-        <div className="mb-2 text-[17px] font-bold">この試合を削除しますか?</div>
-        <div className="mb-4 text-[13px] leading-relaxed text-ink-sub">
-          <strong className="text-ink">
-            {game.team_top} vs {game.team_bottom}
-          </strong>
-          <br />
-          スコア・QR共有リンクは元に戻せません。
-        </div>
-        {error && (
-          <div className="mb-3 rounded-md border border-live/30 bg-live/5 px-3 py-2 text-xs text-live">
-            削除に失敗しました: {error}
-          </div>
-        )}
-        <div className="flex gap-2.5">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={deleting}
-            className="flex-1 rounded-xl border border-line bg-canvas py-3 text-sm font-semibold text-ink disabled:opacity-50"
-          >
-            キャンセル
-          </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={deleting}
-            className="flex-1 rounded-xl bg-live py-3 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            {deleting ? "削除中…" : "削除する"}
-          </button>
-        </div>
       </div>
     </div>
   );

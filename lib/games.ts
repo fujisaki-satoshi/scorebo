@@ -23,6 +23,8 @@ const COL = "games";
 
 export const PAGE_SIZE = 20;
 
+export type PillVariant = "live" | "done" | "scheduled";
+
 function fromDoc(d: QueryDocumentSnapshot<DocumentData>): Game {
   const data = d.data();
   return {
@@ -44,15 +46,13 @@ function fromDoc(d: QueryDocumentSnapshot<DocumentData>): Game {
 
 export async function listMyGames(ownerUid: string): Promise<Game[]> {
   const ref = collection(db, COL);
-  const q = query(ref, where("owner_uid", "==", ownerUid));
+  const q = query(
+    ref,
+    where("owner_uid", "==", ownerUid),
+    orderBy("created_at", "desc"),
+  );
   const snap = await getDocs(q);
-  const games = snap.docs.map(fromDoc);
-  games.sort((a, b) => {
-    const aMs = a.created_at?.toMillis?.() ?? 0;
-    const bMs = b.created_at?.toMillis?.() ?? 0;
-    return bMs - aMs;
-  });
-  return games;
+  return snap.docs.map(fromDoc);
 }
 
 export async function listGames(after?: QueryDocumentSnapshot<DocumentData>) {
@@ -136,8 +136,13 @@ export async function updateGameMeta(
   await updateDoc(doc(db, COL, id), { ...patch, updated_at: serverTimestamp() });
 }
 
-export async function deleteGame(id: string) {
-  await deleteDoc(doc(db, COL, id));
+export async function deleteGame(id: string, viewToken?: string) {
+  const batch = writeBatch(db);
+  batch.delete(doc(db, COL, id));
+  if (viewToken) {
+    batch.delete(doc(db, "view_tokens", viewToken));
+  }
+  await batch.commit();
 }
 
 export function totals(innings: InningScore[]) {
@@ -152,6 +157,10 @@ export function totals(innings: InningScore[]) {
 
 export function findInning(innings: InningScore[], n: number): InningScore | undefined {
   return innings.find((s) => s.inning === n);
+}
+
+export function toInningMap(innings: InningScore[]): Map<number, InningScore> {
+  return new Map(innings.map((s) => [s.inning, s]));
 }
 
 export function lastRecordedInning(innings: InningScore[]): number {
@@ -185,4 +194,19 @@ export function setInning(
   next.push({ inning, top, bottom });
   next.sort((a, b) => a.inning - b.inning);
   return next;
+}
+
+export function getPillStatus(
+  innings: InningScore[],
+  maxInnings: number,
+  status: GameStatus,
+): { pillText: string; pillVariant: PillVariant } {
+  if (status === "completed") {
+    return { pillText: "終了", pillVariant: "done" };
+  }
+  if (hasAnyScore(innings)) {
+    const cur = currentInning(innings, maxInnings);
+    return { pillText: `進行中 ${cur}回`, pillVariant: "live" };
+  }
+  return { pillText: "予定", pillVariant: "scheduled" };
 }
