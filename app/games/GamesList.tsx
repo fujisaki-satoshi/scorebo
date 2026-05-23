@@ -208,7 +208,7 @@ export function GamesList() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 pt-[18px] pb-[110px]">
+      <main className="flex-1 px-4 pt-[18px] pb-[126px]">
         {error && (
           <div className="mb-4 rounded-lg border border-live/30 bg-live/5 px-3 py-2 text-xs text-live">
             読み込みエラー: {error}
@@ -261,6 +261,9 @@ export function GamesList() {
         >
           ＋ 試合を作成する
         </Link>
+        <div className="mt-1.5 text-center text-[10px] text-ink-sub/50">
+          {process.env.NEXT_PUBLIC_BUILD_TIME ?? "dev"}
+        </div>
       </div>
     </>
   );
