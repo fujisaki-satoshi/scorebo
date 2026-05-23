@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 
 import { BrandMark } from "@/app/_components/BrandMark";
+import { RecoveryKeyBanner } from "@/app/_components/RecoveryKeyBanner";
 import { SportIcon } from "@/app/_components/SportIcon";
 import { useAnonymousAuth } from "@/lib/auth";
 import { formatGameDate } from "@/lib/dates";
@@ -208,7 +209,10 @@ export function GamesList() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 pt-[18px] pb-[126px]">
+      <main className="flex-1 pt-[18px] pb-[126px]">
+        <RecoveryKeyBanner gameCount={games.length} />
+
+        <div className="px-4">
         {error && (
           <div className="mb-4 rounded-lg border border-live/30 bg-live/5 px-3 py-2 text-xs text-live">
             読み込みエラー: {error}
@@ -252,6 +256,7 @@ export function GamesList() {
             </section>
           </>
         )}
+        </div>
       </main>
 
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-10 mx-auto w-full max-w-[480px] bg-gradient-to-t from-canvas via-canvas/95 to-transparent px-4 pt-3 pb-[18px]">

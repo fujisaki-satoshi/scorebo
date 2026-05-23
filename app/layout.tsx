@@ -46,6 +46,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className="h-full antialiased">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="min-h-screen bg-canvas text-ink">
         <div className="mx-auto flex min-h-screen w-full max-w-[480px] landscape:max-w-[900px] flex-col bg-canvas pb-[env(safe-area-inset-bottom)] shadow-[0_0_0_1px_rgba(0,0,0,0.04)]">
           {children}

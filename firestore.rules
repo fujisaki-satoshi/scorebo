@@ -76,5 +76,13 @@ service cloud.firestore {
         && request.resource.data.game_id.size() > 0;
       allow update, delete: if false;
     }
+
+    // Recovery key identities — written exclusively by Firebase Admin (server-side API routes).
+    // Client can only read their own identity document.
+    match /identities/{identityId} {
+      allow read: if request.auth != null
+        && resource.data.firebase_uid == request.auth.uid;
+      allow write: if false; // Admin SDK bypasses these rules
+    }
   }
 }

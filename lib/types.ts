@@ -1,5 +1,23 @@
 import type { Timestamp } from "firebase/firestore";
 
+export type SaveMethods = {
+  screenshot: boolean;
+  line: boolean;
+  email: boolean;
+  print: boolean;
+};
+
+export type Identity = {
+  id: string;
+  firebaseUid: string;
+  keyHash: string;
+  keyPrefix: string;
+  createdAt: Date;
+  lastUsedAt: Date;
+  status: "active" | "revoked";
+  saveMethods: SaveMethods;
+};
+
 export type Sport = "baseball" | "softball" | "kickball";
 
 export type InningScore = {

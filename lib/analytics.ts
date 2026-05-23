@@ -11,6 +11,11 @@ type EventMap = {
   qr_share_line: { sport: Sport };
   qr_share_copy: { sport: Sport; mode?: string };
   qr_share_native: { sport: Sport; with_image: boolean };
+  key_generated: Record<string, never>;
+  save_method_marked: { method: string };
+  key_restored: Record<string, never>;
+  key_restore_failed: { reason: string };
+  gate_dismissed: Record<string, never>;
 };
 
 export function track<K extends keyof EventMap>(name: K, props: EventMap[K]) {
