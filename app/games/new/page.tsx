@@ -116,8 +116,9 @@ export default function NewGamePage() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
+              onClick={(e) => { try { (e.currentTarget as HTMLInputElement).showPicker(); } catch { /* unsupported */ } }}
               required
-              className="w-full rounded-xl border border-line bg-canvas px-3 py-3 text-base text-ink outline-none focus:border-brand focus:bg-card focus:shadow-[0_0_0_3px_var(--color-brand-light)]"
+              className="w-full appearance-none rounded-xl border border-line bg-canvas px-3 py-3 text-base text-ink outline-none focus:border-brand focus:bg-card focus:shadow-[0_0_0_3px_var(--color-brand-light)]"
             />
           </div>
           <div className="flex-1 rounded-2xl border border-line bg-card px-4 py-3.5">

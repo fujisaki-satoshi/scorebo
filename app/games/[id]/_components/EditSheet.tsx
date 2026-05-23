@@ -31,7 +31,8 @@ function SheetInput({
       type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full ${type !== "date" ? "appearance-none" : ""} rounded-xl border border-line bg-canvas px-3 py-2.5 text-base outline-none focus:border-brand focus:bg-card focus:shadow-[0_0_0_3px_var(--color-brand-light)]`}
+      onClick={type === "date" ? (e) => { try { (e.currentTarget as HTMLInputElement).showPicker(); } catch { /* unsupported */ } } : undefined}
+      className="w-full appearance-none rounded-xl border border-line bg-canvas px-3 py-2.5 text-base outline-none focus:border-brand focus:bg-card focus:shadow-[0_0_0_3px_var(--color-brand-light)]"
     />
   );
 }
