@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { InningsStepper } from "@/app/_components/InningsStepper";
 import { SportIcon } from "@/app/_components/SportIcon";
@@ -32,6 +32,7 @@ export default function NewGamePage() {
   const [teamBottom, setTeamBottom] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   function handleSportChange(s: Sport) {
     setSport(s);
@@ -112,14 +113,19 @@ export default function NewGamePage() {
             <div className="mb-2.5 text-[12px] font-semibold tracking-[0.04em] text-ink-sub">
               試合日<span className="ml-0.5 text-[#c0392b]">*</span>
             </div>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              onClick={(e) => { try { (e.currentTarget as HTMLInputElement).showPicker(); } catch { /* unsupported */ } }}
-              required
-              className="w-full appearance-none rounded-xl border border-line bg-canvas px-3 py-3 text-base text-ink outline-none focus:border-brand focus:bg-card focus:shadow-[0_0_0_3px_var(--color-brand-light)]"
-            />
+            <div
+              className="w-full"
+              onClick={() => { try { dateInputRef.current?.showPicker(); } catch { /* unsupported */ } }}
+            >
+              <input
+                ref={dateInputRef}
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                required
+                className="w-full appearance-none pointer-events-none rounded-xl border border-line bg-canvas px-3 py-3 text-base text-ink outline-none"
+              />
+            </div>
           </div>
           <div className="flex-1 rounded-2xl border border-line bg-card px-4 py-3.5">
             <div className="mb-2.5 text-[12px] font-semibold tracking-[0.04em] text-ink-sub">

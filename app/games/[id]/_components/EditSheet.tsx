@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { InningsStepper } from "@/app/_components/InningsStepper";
 import { SportIcon } from "@/app/_components/SportIcon";
@@ -26,15 +26,27 @@ function SheetInput({
   value: string;
   onChange: (v: string) => void;
 }) {
-  return (
+  const ref = useRef<HTMLInputElement>(null);
+  const input = (
     <input
+      ref={type === "date" ? ref : undefined}
       type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      onClick={type === "date" ? (e) => { try { (e.currentTarget as HTMLInputElement).showPicker(); } catch { /* unsupported */ } } : undefined}
-      className="w-full appearance-none rounded-xl border border-line bg-canvas px-3 py-2.5 text-base outline-none focus:border-brand focus:bg-card focus:shadow-[0_0_0_3px_var(--color-brand-light)]"
+      className={`w-full appearance-none rounded-xl border border-line bg-canvas px-3 py-2.5 text-base outline-none focus:border-brand focus:bg-card focus:shadow-[0_0_0_3px_var(--color-brand-light)]${type === "date" ? " pointer-events-none" : ""}`}
     />
   );
+  if (type === "date") {
+    return (
+      <div
+        className="w-full"
+        onClick={() => { try { ref.current?.showPicker(); } catch { /* unsupported */ } }}
+      >
+        {input}
+      </div>
+    );
+  }
+  return input;
 }
 
 function SheetTeamInput({
