@@ -10,7 +10,7 @@ import type { Game, Sport } from "@/lib/types";
 
 function FieldGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="mb-3 min-w-0">
+    <div className="mb-3 min-w-0 overflow-hidden">
       <label className="mb-1.5 block text-xs font-semibold text-ink-sub">{label}</label>
       {children}
     </div>
