@@ -1,18 +1,12 @@
-// Record 3 Instagram Reels demo videos for Scorebo using Playwright's built-in video
-// capture. Each demo is recorded in an isolated browser context.
+// Record 2 Instagram demo videos for Scorebo using Playwright's built-in video capture.
 //
 //   node --env-file=.env.local scripts/record-demo.mjs
 //
-// Output (after ffmpeg conversion if available):
-//   public/demo/demo-1-create.mp4   → 試合を30秒で作成
-//   public/demo/demo-2-score.mp4    → スコアをイニングごとに入力
-//   public/demo/demo-3-share.mp4    → QRコードで全員に共有
+// Output:
+//   public/demo/demo-1-flow.mp4        — 全フロー: 試合作成→スコア入力→QR共有 (portrait 9:16)
+//   public/demo/demo-2-landscape.mp4   — ランドスケープ: スコア入力→保存→表更新 (landscape 16:9)
 //
 // Without ffmpeg the raw .webm files remain in public/demo/.
-//
-// Tips for Instagram Reels upload:
-//   - Crop/trim to 15–30 seconds in any video editor
-//   - Videos are 390×693 (9:16). Scale up in-editor if needed.
 
 import { execSync } from "node:child_process";
 import { mkdir, rename } from "node:fs/promises";
@@ -73,11 +67,11 @@ async function createTempGame(meta) {
   return ref.id;
 }
 
-// Pre-seed game used in demos 2 and 3 (4 innings done, 5th is the active entry)
+// Pre-seeded game for demo 2 (4 innings done, 5th is the active entry)
 const demoId = await createTempGame({
   sport: "baseball",
-  date: "2026-05-10",
-  location: "駒沢オリンピック公園 野球場",
+  date: "2026-05-24",
+  location: "駒沢公園 野球場",
   team_top: "北区ファイターズ",
   team_bottom: "足立サムライズ",
   max_innings: 9,
@@ -91,25 +85,14 @@ const demoId = await createTempGame({
 });
 console.log(`Seeded demo game: ${demoId}`);
 
-// IDs to clean up at the end (demo-1 adds one more after form creation)
+// Games to clean up at the end (demo-1 adds one more after form creation)
 const cleanupIds = [demoId];
 
-// ── Browser context factory ────────────────────────────────────────────────────
+// ── Browser context factories ──────────────────────────────────────────────────
 
-async function makeContext(browser, videoDir) {
-  const ctx = await browser.newContext({
-    ...devices["iPhone 14"],
-    locale: "ja-JP",
-    deviceScaleFactor: 2,
-    // 9:16 aspect ratio matches Instagram Reels
-    viewport: { width: 390, height: 693 },
-    recordVideo: {
-      dir: videoDir,
-      size: { width: 390, height: 693 },
-    },
-  });
-  // Stub navigator.share so the share UI renders on headless Chromium
+async function stubShare(ctx) {
   await ctx.addInitScript(() => {
+    // Stub navigator.share so share UI renders in headless Chromium
     Object.defineProperty(navigator, "share", {
       configurable: true,
       value: () => Promise.resolve(),
@@ -119,6 +102,30 @@ async function makeContext(browser, videoDir) {
       value: () => true,
     });
   });
+}
+
+async function makePortraitContext(browser, videoDir) {
+  const ctx = await browser.newContext({
+    ...devices["iPhone 14"],
+    locale: "ja-JP",
+    deviceScaleFactor: 2,
+    viewport: { width: 390, height: 693 },
+    recordVideo: { dir: videoDir, size: { width: 390, height: 693 } },
+  });
+  await stubShare(ctx);
+  return ctx;
+}
+
+async function makeLandscapeContext(browser, videoDir) {
+  // Width > height triggers @media (orientation: landscape) in the app
+  const ctx = await browser.newContext({
+    userAgent: devices["iPhone 14"].userAgent,
+    locale: "ja-JP",
+    deviceScaleFactor: 2,
+    viewport: { width: 693, height: 390 },
+    recordVideo: { dir: videoDir, size: { width: 693, height: 390 } },
+  });
+  await stubShare(ctx);
   return ctx;
 }
 
@@ -127,7 +134,7 @@ async function settle(page, ms = 400) {
   await page.waitForTimeout(ms);
 }
 
-// ── ffmpeg helper ──────────────────────────────────────────────────────────────
+// ── ffmpeg helpers ─────────────────────────────────────────────────────────────
 
 function hasFfmpeg() {
   try {
@@ -138,9 +145,16 @@ function hasFfmpeg() {
   }
 }
 
-async function toMp4(webmPath, mp4Path) {
+function toPortraitMp4(webmPath, mp4Path) {
   execSync(
     `ffmpeg -y -i "${webmPath}" -vf scale=1080:1920 -c:v libx264 -preset fast -crf 20 -pix_fmt yuv420p "${mp4Path}"`,
+    { stdio: "inherit" },
+  );
+}
+
+function toLandscapeMp4(webmPath, mp4Path) {
+  execSync(
+    `ffmpeg -y -i "${webmPath}" -vf scale=1920:1080 -c:v libx264 -preset fast -crf 20 -pix_fmt yuv420p "${mp4Path}"`,
     { stdio: "inherit" },
   );
 }
@@ -155,135 +169,66 @@ try {
   const ffmpeg = hasFfmpeg();
   if (!ffmpeg) console.warn("⚠ ffmpeg not found — .webm files only (no mp4 conversion)");
 
-  // ── Demo 1: 試合を作成 ─────────────────────────────────────────────────────
+  // ── Demo 1: 全フロー (portrait 9:16) ──────────────────────────────────────
   {
-    console.log("\n▶ Recording demo-1-create …");
+    console.log("\n▶ Recording demo-1-flow …");
     const videoDir = resolve(OUT_DIR, "tmp-d1");
     await mkdir(videoDir, { recursive: true });
 
-    const ctx = await makeContext(browser, videoDir);
+    const ctx = await makePortraitContext(browser, videoDir);
     const page = await ctx.newPage();
 
-    // Opening pause — lets the recording start cleanly
-    await page.goto(`${SITE}/games`, { waitUntil: "domcontentloaded" });
-    await settle(page, 1500);
-
+    // Arrive at create form
     await page.goto(`${SITE}/games/new`, { waitUntil: "domcontentloaded" });
-    await settle(page, 1000);
+    await settle(page, 1200);
 
-    // Sport is 野球 by default; click it to make the selection visible
+    // Tap 野球 to make the selection visually active
     await page.getByRole("button", { name: "野球" }).click();
+    await settle(page, 500);
+
+    // Fill teams and location at a natural pace
+    await page.getByPlaceholder("先攻チーム名").fill("北区ファイターズ");
     await settle(page, 600);
-
-    // Type team names at a natural pace
-    await page.getByPlaceholder("先攻チーム名").fill("北区ファイターズ", { timeout: 5000 });
-    await settle(page, 700);
     await page.getByPlaceholder("後攻チーム名").fill("足立サムライズ");
+    await settle(page, 600);
+    await page.getByPlaceholder("例: 福井県営球場 第2グラウンド").fill("駒沢公園 野球場");
     await settle(page, 700);
 
-    await page.getByPlaceholder("例: 福井県営球場 第2グラウンド").fill("荒川河川敷");
-    await settle(page, 800);
-
-    // Submit
-    await page.getByRole("button", { name: /試合を作成して共有する/ }).click();
-
-    // Wait for redirect to /games/{id}
-    await page.waitForURL(/\/games\/[^/]+$/, { timeout: 20000 });
+    // Submit and wait for redirect to score screen
+    await page.getByRole("button", { name: "試合を作成して共有する" }).click();
+    await page.waitForURL(/\/games\/[^/]+$/, { timeout: 25000 });
     const createdId = page.url().split("/").pop();
     if (createdId && createdId !== "new") cleanupIds.push(createdId);
 
-    // Wait for score screen: share button is always present for in_progress games
     await page.waitForSelector("button:has-text('共有')", { timeout: 25000 });
-    await settle(page, 2500); // show the fresh score screen
+    await settle(page, 1200);
 
-    await ctx.close();
+    // Scroll down to the inning stepper
+    await page.evaluate(() => window.scrollTo({ top: 260, behavior: "smooth" }));
+    await settle(page, 500);
 
-    const [webm] = (await import("node:fs")).readdirSync(videoDir).filter((f) => f.endsWith(".webm"));
-    if (!webm) throw new Error("No webm found for demo-1");
-    const webmPath = resolve(videoDir, webm);
-    const finalWebm = resolve(OUT_DIR, "demo-1-create.webm");
-    await rename(webmPath, finalWebm);
-
-    if (ffmpeg) {
-      await toMp4(finalWebm, resolve(OUT_DIR, "demo-1-create.mp4"));
-      console.log("✓ demo-1-create.mp4");
-    } else {
-      console.log("✓ demo-1-create.webm");
-    }
-  }
-
-  // ── Demo 2: スコアを入力 ──────────────────────────────────────────────────
-  {
-    console.log("\n▶ Recording demo-2-score …");
-    const videoDir = resolve(OUT_DIR, "tmp-d2");
-    await mkdir(videoDir, { recursive: true });
-
-    const ctx = await makeContext(browser, videoDir);
-    const page = await ctx.newPage();
-
-    await page.goto(`${SITE}/games/${demoId}`, { waitUntil: "domcontentloaded" });
-    await page.waitForSelector("button:has-text('共有')", { timeout: 25000 });
-    await settle(page, 2000); // let viewer read the current scoreboard
-
-    // Scroll down to the stepper card (it may be below the fold on short viewport)
-    await page.evaluate(() => window.scrollTo({ top: 300, behavior: "smooth" }));
-    await settle(page, 800);
-
-    // Tap +1 twice for top team (先攻) — first button matching aria-label "+1"
+    // Enter 1 inning: +1 for each team
     const plusTop = page.getByRole("button", { name: "+1" }).first();
     await plusTop.click();
-    await settle(page, 500);
-    await plusTop.click();
-    await settle(page, 600);
-
-    // Tap +1 once for bottom team (後攻) — second +1 button
+    await settle(page, 350);
     const plusBottom = page.getByRole("button", { name: "+1" }).last();
     await plusBottom.click();
-    await settle(page, 800);
+    await settle(page, 500);
 
-    // Save
+    // Save — button text is "{n}回を保存する", partial match on "保存する"
     await page.getByRole("button").filter({ hasText: "保存する" }).click();
-    await settle(page, 2500); // show the updated score table
-
-    // Scroll back up to see full scoreboard
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
     await settle(page, 1500);
 
-    await ctx.close();
-
-    const [webm] = (await import("node:fs")).readdirSync(videoDir).filter((f) => f.endsWith(".webm"));
-    if (!webm) throw new Error("No webm found for demo-2");
-    const webmPath = resolve(videoDir, webm);
-    const finalWebm = resolve(OUT_DIR, "demo-2-score.webm");
-    await rename(webmPath, finalWebm);
-
-    if (ffmpeg) {
-      await toMp4(finalWebm, resolve(OUT_DIR, "demo-2-score.mp4"));
-      console.log("✓ demo-2-score.mp4");
-    } else {
-      console.log("✓ demo-2-score.webm");
-    }
-  }
-
-  // ── Demo 3: QRコードで共有 ────────────────────────────────────────────────
-  {
-    console.log("\n▶ Recording demo-3-share …");
-    const videoDir = resolve(OUT_DIR, "tmp-d3");
-    await mkdir(videoDir, { recursive: true });
-
-    const ctx = await makeContext(browser, videoDir);
-    const page = await ctx.newPage();
-
-    await page.goto(`${SITE}/games/${demoId}`, { waitUntil: "domcontentloaded" });
-    await page.waitForSelector("button:has-text('共有')", { timeout: 25000 });
-    await settle(page, 1800); // show score screen briefly
+    // Scroll back to top to show the updated scoreboard
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+    await settle(page, 1000);
 
     // Open share modal
     await page.getByRole("button", { name: "共有" }).click();
     await page.waitForSelector("text=みんなに送る", { timeout: 10000 });
-    await settle(page, 1500); // show "みんなに送る" and image preview
+    await settle(page, 800);
 
-    // Wait for OG image to load
+    // Wait for OG score image to load
     await page.waitForFunction(
       () => {
         const img = document.querySelector('img[alt$="のプレビュー"]');
@@ -291,28 +236,80 @@ try {
       },
       { timeout: 30000 },
     );
-    await settle(page, 2000); // linger on image preview
+    await settle(page, 1500);
 
-    // Scroll down to QR code section
+    // Scroll modal to QR code — key visual for Instagram
     await page.evaluate(() => {
       const qr = document.querySelector("canvas");
       if (qr) qr.scrollIntoView({ behavior: "smooth", block: "center" });
     });
-    await settle(page, 3000); // hold on QR code — key visual for Instagram
+    await settle(page, 2500);
 
     await ctx.close();
 
     const [webm] = (await import("node:fs")).readdirSync(videoDir).filter((f) => f.endsWith(".webm"));
-    if (!webm) throw new Error("No webm found for demo-3");
+    if (!webm) throw new Error("No webm found for demo-1");
     const webmPath = resolve(videoDir, webm);
-    const finalWebm = resolve(OUT_DIR, "demo-3-share.webm");
+    const finalWebm = resolve(OUT_DIR, "demo-1-flow.webm");
     await rename(webmPath, finalWebm);
 
     if (ffmpeg) {
-      await toMp4(finalWebm, resolve(OUT_DIR, "demo-3-share.mp4"));
-      console.log("✓ demo-3-share.mp4");
+      toPortraitMp4(finalWebm, resolve(OUT_DIR, "demo-1-flow.mp4"));
+      console.log("✓ demo-1-flow.mp4");
     } else {
-      console.log("✓ demo-3-share.webm");
+      console.log("✓ demo-1-flow.webm");
+    }
+  }
+
+  // ── Demo 2: ランドスケープ (landscape 16:9) ────────────────────────────────
+  {
+    console.log("\n▶ Recording demo-2-landscape …");
+    const videoDir = resolve(OUT_DIR, "tmp-d2");
+    await mkdir(videoDir, { recursive: true });
+
+    const ctx = await makeLandscapeContext(browser, videoDir);
+    const page = await ctx.newPage();
+
+    await page.goto(`${SITE}/games/${demoId}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector("button:has-text('共有')", { timeout: 25000 });
+    // Show compact hero bar + full-width score table
+    await settle(page, 2000);
+
+    // Scroll to inning stepper
+    await page.evaluate(() => window.scrollTo({ top: 200, behavior: "smooth" }));
+    await settle(page, 500);
+
+    // +2 for top team, +1 for bottom team
+    const plusTop = page.getByRole("button", { name: "+1" }).first();
+    await plusTop.click();
+    await settle(page, 350);
+    await plusTop.click();
+    await settle(page, 350);
+    const plusBottom = page.getByRole("button", { name: "+1" }).last();
+    await plusBottom.click();
+    await settle(page, 500);
+
+    // Save
+    await page.getByRole("button").filter({ hasText: "保存する" }).click();
+    await settle(page, 1500);
+
+    // Scroll back to top to show updated table in landscape full-width view
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+    await settle(page, 2000);
+
+    await ctx.close();
+
+    const [webm] = (await import("node:fs")).readdirSync(videoDir).filter((f) => f.endsWith(".webm"));
+    if (!webm) throw new Error("No webm found for demo-2");
+    const webmPath = resolve(videoDir, webm);
+    const finalWebm = resolve(OUT_DIR, "demo-2-landscape.webm");
+    await rename(webmPath, finalWebm);
+
+    if (ffmpeg) {
+      toLandscapeMp4(finalWebm, resolve(OUT_DIR, "demo-2-landscape.mp4"));
+      console.log("✓ demo-2-landscape.mp4");
+    } else {
+      console.log("✓ demo-2-landscape.webm");
     }
   }
 
@@ -323,13 +320,11 @@ try {
 } finally {
   if (browser) await browser.close();
 
-  // Clean up temp game directories
   const { rmSync } = await import("node:fs");
-  for (const d of ["tmp-d1", "tmp-d2", "tmp-d3"]) {
+  for (const d of ["tmp-d1", "tmp-d2"]) {
     try { rmSync(resolve(OUT_DIR, d), { recursive: true, force: true }); } catch {}
   }
 
-  // Delete Firestore temp games
   for (const id of cleanupIds) {
     try {
       await deleteDoc(doc(db, "games", id));
