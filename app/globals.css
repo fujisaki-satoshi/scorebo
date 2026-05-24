@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "react-day-picker/style.css";
 
 @custom-variant landscape (@media (orientation: landscape));
 
@@ -50,6 +51,22 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+/* react-day-picker: brand color overrides */
+.rdp-root {
+  --rdp-accent-color: #1a7a35;
+  --rdp-accent-background-color: #e8f5ed;
+  --rdp-today-color: #1a7a35;
+  --rdp-day-height: 42px;
+  --rdp-day-width: 42px;
+  --rdp-day_button-height: 38px;
+  --rdp-day_button-width: 38px;
+}
+.rdp-selected .rdp-day_button {
+  background-color: #1a7a35;
+  color: #ffffff;
+  border-color: #1a7a35;
 }
 
 @keyframes pulse-dot {

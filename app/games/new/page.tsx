@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
+import { DatePickerField } from "@/app/_components/DatePickerField";
 import { InningsStepper } from "@/app/_components/InningsStepper";
 import { SportIcon } from "@/app/_components/SportIcon";
 import { track } from "@/lib/analytics";
@@ -32,7 +33,6 @@ export default function NewGamePage() {
   const [teamBottom, setTeamBottom] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const dateInputRef = useRef<HTMLInputElement>(null);
 
   function handleSportChange(s: Sport) {
     setSport(s);
@@ -108,38 +108,19 @@ export default function NewGamePage() {
           </div>
         </FieldCard>
 
-        <div className="mb-3.5 flex gap-2.5">
-          <div className="min-w-0 flex-[1.4] overflow-hidden rounded-2xl border border-line bg-card px-4 py-3.5">
-            <div className="mb-2.5 text-[12px] font-semibold tracking-[0.04em] text-ink-sub">
-              試合日<span className="ml-0.5 text-[#c0392b]">*</span>
-            </div>
-            <div
-              className="w-full"
-              onClick={() => { try { dateInputRef.current?.showPicker(); } catch { /* unsupported */ } }}
-            >
-              <input
-                ref={dateInputRef}
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-                className="w-full appearance-none pointer-events-none rounded-xl border border-line bg-canvas px-3 py-3 text-base text-ink outline-none"
-              />
-            </div>
-          </div>
-          <div className="flex-1 rounded-2xl border border-line bg-card px-4 py-3.5">
-            <div className="mb-2.5 text-[12px] font-semibold tracking-[0.04em] text-ink-sub">
-              回数(最大)
-            </div>
-            <InningsStepper
-              value={maxInnings}
-              onChange={(n) => {
-                setMaxInnings(n);
-                setMaxInningsTouched(true);
-              }}
-            />
-          </div>
-        </div>
+        <FieldCard label="試合日" required>
+          <DatePickerField value={date} onChange={setDate} />
+        </FieldCard>
+
+        <FieldCard label="回数(最大)">
+          <InningsStepper
+            value={maxInnings}
+            onChange={(n) => {
+              setMaxInnings(n);
+              setMaxInningsTouched(true);
+            }}
+          />
+        </FieldCard>
 
         <FieldCard label="場所・グラウンド名">
           <input

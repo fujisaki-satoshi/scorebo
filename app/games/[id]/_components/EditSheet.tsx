@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 
+import { DatePickerField } from "@/app/_components/DatePickerField";
 import { InningsStepper } from "@/app/_components/InningsStepper";
 import { SportIcon } from "@/app/_components/SportIcon";
 import { updateGameMeta } from "@/lib/games";
@@ -22,31 +23,18 @@ function SheetInput({
   value,
   onChange,
 }: {
-  type: "text" | "date" | "number";
+  type: "text" | "number";
   value: string;
   onChange: (v: string) => void;
 }) {
-  const ref = useRef<HTMLInputElement>(null);
-  const input = (
+  return (
     <input
-      ref={type === "date" ? ref : undefined}
       type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full appearance-none rounded-xl border border-line bg-canvas px-3 py-2.5 text-base outline-none focus:border-brand focus:bg-card focus:shadow-[0_0_0_3px_var(--color-brand-light)]${type === "date" ? " pointer-events-none" : ""}`}
+      className="w-full appearance-none rounded-xl border border-line bg-canvas px-3 py-2.5 text-base outline-none focus:border-brand focus:bg-card focus:shadow-[0_0_0_3px_var(--color-brand-light)]"
     />
   );
-  if (type === "date") {
-    return (
-      <div
-        className="w-full"
-        onClick={() => { try { ref.current?.showPicker(); } catch { /* unsupported */ } }}
-      >
-        {input}
-      </div>
-    );
-  }
-  return input;
 }
 
 function SheetTeamInput({
@@ -148,7 +136,7 @@ export function EditSheet({ game, onClose }: { game: Game; onClose: () => void }
         <div className="mb-3 flex gap-2.5">
           <div className="min-w-0 flex-[1.4] overflow-hidden">
             <label className="mb-1.5 block text-xs font-semibold text-ink-sub">試合日</label>
-            <SheetInput type="date" value={date} onChange={setDate} />
+            <DatePickerField value={date} onChange={setDate} />
           </div>
           <div className="flex-1">
             <label className="mb-1.5 block text-xs font-semibold text-ink-sub">回数(最大)</label>
