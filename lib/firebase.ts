@@ -1,6 +1,6 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,3 +14,11 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+
+// globalThis フラグで HMR 時の二重接続を防ぐ
+const g = globalThis as typeof globalThis & { __firestoreEmulatorConnected?: boolean };
+if (!g.__firestoreEmulatorConnected && process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST) {
+  const [host, port] = process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST.split(":");
+  connectFirestoreEmulator(db, host, Number(port));
+  g.__firestoreEmulatorConnected = true;
+}

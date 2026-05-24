@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { GameHero } from "@/app/_components/GameHero";
 import { ScoreTable } from "@/app/_components/ScoreTable";
@@ -32,6 +32,8 @@ export function GameView({ id }: { id: string }) {
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const deletingRef = useRef(false);
+
   const [editingInning, setEditingInning] = useState<number | null>(null);
   const [localTop, setLocalTop] = useState(0);
   const [localBottom, setLocalBottom] = useState(0);
@@ -43,9 +45,10 @@ export function GameView({ id }: { id: string }) {
   useEffect(() => {
     const unsub = watchGame(id, (g) => {
       if (!g) {
-        setNotFound(true);
+        if (!deletingRef.current) setNotFound(true);
         return;
       }
+      setNotFound(false);
       setGame(g);
     });
     return () => unsub();
@@ -312,7 +315,7 @@ export function GameView({ id }: { id: string }) {
       {modal === "share" && <ShareModal game={game} onClose={() => setModal(null)} />}
       {modal === "edit" && <EditSheet game={game} onClose={() => setModal(null)} />}
       {modal === "delete" && (
-        <DeleteDialog game={game} onClose={() => setModal(null)} onDeleted={() => router.replace("/")} />
+        <DeleteDialog game={game} onClose={() => setModal(null)} onDeleted={() => { deletingRef.current = true; router.replace("/"); }} />
       )}
     </>
   );
