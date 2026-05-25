@@ -1,22 +1,11 @@
 import { test, expect, type Page } from "@playwright/test";
-import {
-  initializeTestEnvironment,
-  type RulesTestEnvironment,
-} from "@firebase/rules-unit-testing";
-import { doc, setDoc } from "firebase/firestore";
-import { readFileSync } from "node:fs";
+import { type RulesTestEnvironment } from "@firebase/rules-unit-testing";
+import { createTestEnv, seedGame } from "./_helpers";
 
 let testEnv: RulesTestEnvironment;
 
 test.beforeAll(async () => {
-  testEnv = await initializeTestEnvironment({
-    projectId: "scorebo-test",
-    firestore: {
-      rules: readFileSync("firestore.rules", "utf8"),
-      host: "localhost",
-      port: 8080,
-    },
-  });
+  testEnv = await createTestEnv();
 });
 
 test.afterAll(async () => {
@@ -26,26 +15,6 @@ test.afterAll(async () => {
 test.beforeEach(async () => {
   await testEnv.clearFirestore();
 });
-
-async function seedGame(gameId: string, viewToken: string) {
-  await testEnv.withSecurityRulesDisabled(async (ctx) => {
-    const db = ctx.firestore();
-    await setDoc(doc(db, "games", gameId), {
-      sport: "baseball",
-      date: "2026-05-24",
-      location: "",
-      team_top: "テストA",
-      team_bottom: "テストB",
-      max_innings: 9,
-      innings: [],
-      status: "in_progress",
-      created_at: new Date(),
-      updated_at: new Date(),
-      view_token: viewToken,
-    });
-    await setDoc(doc(db, "view_tokens", viewToken), { game_id: gameId });
-  });
-}
 
 async function deleteGame(page: Page, gameId: string) {
   await page.goto(`/games/${gameId}`);
@@ -58,7 +27,7 @@ async function deleteGame(page: Page, gameId: string) {
 // ─── メインシナリオ ────────────────────────────────────────────────────────────
 
 test("試合を削除するとホームへ遷移する", async ({ page }) => {
-  await seedGame("e2e-delete-1", "e2e-token-1");
+  await seedGame(testEnv, "e2e-delete-1", "e2e-token-1");
 
   await deleteGame(page, "e2e-delete-1");
 
@@ -75,7 +44,7 @@ test("試合を削除するとホームへ遷移する", async ({ page }) => {
 test("削除後に「試合が見つかりません」で固まらない（リグレッション）", async ({
   page,
 }) => {
-  await seedGame("e2e-delete-2", "e2e-token-2");
+  await seedGame(testEnv, "e2e-delete-2", "e2e-token-2");
 
   await deleteGame(page, "e2e-delete-2");
 

@@ -10,15 +10,20 @@ export function DeleteDialog({
   game,
   onClose,
   onDeleted,
+  onDeleting,
 }: {
   game: Game;
   onClose: () => void;
   onDeleted: () => void;
+  onDeleting?: () => void;
 }) {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleDelete() {
+    // onDeleting を先に呼ぶことで、Firestore の楽観的更新が発火する前に
+    // deletingRef を true にし、watchGame が null を受け取っても notFound にならないようにする
+    onDeleting?.();
     setDeleting(true);
     setError(null);
     try {

@@ -315,7 +315,12 @@ export function GameView({ id }: { id: string }) {
       {modal === "share" && <ShareModal game={game} onClose={() => setModal(null)} />}
       {modal === "edit" && <EditSheet game={game} onClose={() => setModal(null)} />}
       {modal === "delete" && (
-        <DeleteDialog game={game} onClose={() => setModal(null)} onDeleted={() => { deletingRef.current = true; router.replace("/"); }} />
+        <DeleteDialog
+          game={game}
+          onClose={() => setModal(null)}
+          onDeleting={() => { deletingRef.current = true; }}
+          onDeleted={() => { router.replace("/"); }}
+        />
       )}
     </>
   );
