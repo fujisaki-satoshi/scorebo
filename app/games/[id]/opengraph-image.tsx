@@ -416,7 +416,7 @@ function ScoreTableJSX({
 
   function renderRow(
     label: string,
-    getValue: (n: number) => number | null | undefined,
+    getValue: (n: number) => number | null | "skip" | undefined,
     total: number,
     last: boolean,
   ) {
@@ -432,7 +432,7 @@ function ScoreTableJSX({
           const v = getValue(n);
           return (
             <div key={n} style={cellStyle}>
-              {v == null ? "−" : v}
+              {v == null ? "−" : v === "skip" ? "✕" : v}
             </div>
           );
         })}

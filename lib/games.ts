@@ -150,7 +150,7 @@ export function totals(innings: InningScore[]) {
   let bottom = 0;
   for (const s of innings) {
     top += s.top ?? 0;
-    bottom += s.bottom ?? 0;
+    bottom += typeof s.bottom === "number" ? s.bottom : 0;
   }
   return { top, bottom };
 }
@@ -188,7 +188,7 @@ export function setInning(
   innings: InningScore[],
   inning: number,
   top: number | null,
-  bottom: number | null,
+  bottom: number | null | "skip",
 ): InningScore[] {
   const next = innings.filter((s) => s.inning !== inning);
   next.push({ inning, top, bottom });

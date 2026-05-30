@@ -40,6 +40,14 @@ describe("totals", () => {
     ];
     expect(totals(innings)).toEqual({ top: 1, bottom: 2 });
   });
+
+  it("skip は 0 として合算する", () => {
+    const innings: InningScore[] = [
+      { inning: 1, top: 3, bottom: 2 },
+      { inning: 2, top: 1, bottom: "skip" },
+    ];
+    expect(totals(innings)).toEqual({ top: 4, bottom: 2 });
+  });
 });
 
 // ─── findInning ──────────────────────────────────────────────────────────────
@@ -99,6 +107,11 @@ describe("setInning", () => {
     expect(result[0].inning).toBe(1);
     expect(result[1].inning).toBe(3);
   });
+
+  it("bottom を skip として保存できる", () => {
+    const result = setInning([], 9, 2, "skip");
+    expect(result).toEqual([{ inning: 9, top: 2, bottom: "skip" }]);
+  });
 });
 
 // ─── currentInning ───────────────────────────────────────────────────────────
@@ -128,6 +141,15 @@ describe("currentInning", () => {
       { inning: 3, top: 2, bottom: 1 }, // 2 回が抜けている
     ];
     expect(currentInning(innings, 9)).toBe(2);
+  });
+
+  it("bottom が skip のイニングは記録済みとして次を返す", () => {
+    const innings: InningScore[] = Array.from({ length: 9 }, (_, i) => ({
+      inning: i + 1,
+      top: 1,
+      bottom: i === 8 ? ("skip" as const) : 0,
+    }));
+    expect(currentInning(innings, 9)).toBe(9);
   });
 });
 

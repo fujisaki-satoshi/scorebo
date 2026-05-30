@@ -23,7 +23,7 @@ export type Sport = "baseball" | "softball" | "kickball";
 export type InningScore = {
   inning: number;
   top: number | null;
-  bottom: number | null;
+  bottom: number | null | "skip";
 };
 
 export type GameStatus = "in_progress" | "completed";

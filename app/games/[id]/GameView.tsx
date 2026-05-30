@@ -37,6 +37,7 @@ export function GameView({ id }: { id: string }) {
   const [editingInning, setEditingInning] = useState<number | null>(null);
   const [localTop, setLocalTop] = useState(0);
   const [localBottom, setLocalBottom] = useState(0);
+  const [localBottomSkip, setLocalBottomSkip] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const [modal, setModal] = useState<Modal>(null);
@@ -61,7 +62,14 @@ export function GameView({ id }: { id: string }) {
     setEditingInning(cur);
     const slot = findInning(game.innings, cur);
     setLocalTop(slot?.top ?? 0);
-    setLocalBottom(slot?.bottom ?? 0);
+    const b = slot?.bottom;
+    if (b === "skip") {
+      setLocalBottomSkip(true);
+      setLocalBottom(0);
+    } else {
+      setLocalBottomSkip(false);
+      setLocalBottom(b ?? 0);
+    }
   }, [game, editingInning]);
 
   const switchInning = useCallback(
@@ -70,7 +78,14 @@ export function GameView({ id }: { id: string }) {
       setEditingInning(n);
       const slot = findInning(game.innings, n);
       setLocalTop(slot?.top ?? 0);
-      setLocalBottom(slot?.bottom ?? 0);
+      const b = slot?.bottom;
+      if (b === "skip") {
+        setLocalBottomSkip(true);
+        setLocalBottom(0);
+      } else {
+        setLocalBottomSkip(false);
+        setLocalBottom(b ?? 0);
+      }
     },
     [game],
   );
@@ -110,14 +125,21 @@ export function GameView({ id }: { id: string }) {
     setSaving(true);
     setError(null);
     try {
-      const nextInnings = setInning(game.innings, editingInning, localTop, localBottom);
+      const nextInnings = setInning(game.innings, editingInning, localTop, localBottomSkip ? "skip" : localBottom);
       await updateInnings(game.id, nextInnings);
       track("inning_saved", { sport: game.sport, inning: editingInning });
       const advance = currentInning(nextInnings, game.max_innings);
       setEditingInning(advance);
       const slot = findInning(nextInnings, advance);
       setLocalTop(slot?.top ?? 0);
-      setLocalBottom(slot?.bottom ?? 0);
+      const advB = slot?.bottom;
+      if (advB === "skip") {
+        setLocalBottomSkip(true);
+        setLocalBottom(0);
+      } else {
+        setLocalBottomSkip(false);
+        setLocalBottom(advB ?? 0);
+      }
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -249,11 +271,12 @@ export function GameView({ id }: { id: string }) {
           onChange={setLocalTop}
         />
         <div className="border-t border-dashed border-line">
-          <StepperRow
+          <BottomRow
             label={game.team_bottom || "後攻"}
-            side="後攻"
             value={localBottom}
             onChange={setLocalBottom}
+            skipped={localBottomSkip}
+            onToggleSkip={() => setLocalBottomSkip((s) => !s)}
           />
         </div>
 
@@ -361,6 +384,78 @@ function StepperRow({
           aria-label="+1"
         >
           ＋
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function BottomRow({
+  label,
+  value,
+  onChange,
+  skipped,
+  onToggleSkip,
+}: {
+  label: string;
+  value: number;
+  onChange: (n: number) => void;
+  skipped: boolean;
+  onToggleSkip: () => void;
+}) {
+  return (
+    <div>
+      <div
+        className={`flex items-center justify-between py-3 transition-colors ${
+          skipped ? "-mx-2.5 rounded-xl bg-[#fdf4d4] px-2.5" : ""
+        }`}
+      >
+        <div className="text-[14px]">
+          <span className={`font-semibold ${skipped ? "text-[#c98a1c]" : ""}`}>{label}</span>
+          <span className={`ml-1 text-[12px] ${skipped ? "text-[#c98a1c]/80" : "text-ink-sub"}`}>(後攻)</span>
+        </div>
+        {skipped ? (
+          <span className="inline-flex items-center gap-2 rounded-[10px] border-[1.5px] border-[#ecc56a] bg-white px-4 py-2 text-[14px] font-bold text-[#c98a1c]">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+              <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+            </svg>
+            この回は省略
+          </span>
+        ) : (
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => onChange(Math.max(0, value - 1))}
+              disabled={value <= 0}
+              className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-brand bg-card text-2xl font-bold leading-none text-brand active:bg-brand-light disabled:cursor-not-allowed disabled:border-line disabled:text-[#ccc]"
+              aria-label="-1"
+            >
+              −
+            </button>
+            <span className="min-w-10 text-center text-[32px] font-bold tabular-nums">{value}</span>
+            <button
+              type="button"
+              onClick={() => onChange(Math.min(99, value + 1))}
+              className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-brand bg-card text-2xl font-bold leading-none text-brand active:bg-brand-light"
+              aria-label="+1"
+            >
+              ＋
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="pb-1 pt-3">
+        <button
+          type="button"
+          onClick={onToggleSkip}
+          className={`inline-flex min-h-[44px] items-center rounded-full border-[1.5px] px-[18px] text-[14px] font-bold transition-colors ${
+            skipped
+              ? "border-[#ecc56a] bg-[#fff5dc] text-[#c98a1c] active:bg-[#fdeecb]"
+              : "border-line bg-[#fbfbfa] text-ink-sub active:border-[#dcdcd8] active:bg-[#f3f3f1]"
+          }`}
+        >
+          {skipped ? "省略を解除" : "裏の攻撃を省略"}
         </button>
       </div>
     </div>

@@ -226,7 +226,7 @@ export default async function Image({
 
   function renderRow(
     label: string,
-    getValue: (n: number) => number | null | undefined,
+    getValue: (n: number) => number | null | "skip" | undefined,
     total: number,
     last: boolean,
   ) {
@@ -242,7 +242,7 @@ export default async function Image({
           const v = getValue(n);
           return (
             <div key={n} style={cellStyle}>
-              {v == null ? "−" : v}
+              {v == null ? "−" : v === "skip" ? "✕" : v}
             </div>
           );
         })}

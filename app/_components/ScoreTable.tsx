@@ -111,9 +111,9 @@ export function ScoreTable({
                             : onPickInning
                               ? "hover:bg-brand-light"
                               : ""
-                      } ${value == null ? "text-[#c9c9c9]" : ""}`}
+                      } ${value == null ? "text-[#c9c9c9]" : value === "skip" ? "text-[#bbb]" : ""}`}
                     >
-                      {value == null ? "−" : value}
+                      {value == null ? "−" : value === "skip" ? "✕" : value}
                     </td>
                   );
                 })}
