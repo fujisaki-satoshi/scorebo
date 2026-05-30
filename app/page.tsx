@@ -69,44 +69,36 @@ function Hero() {
       <h1 className="relative z-[1] mb-4 text-[28px] font-extrabold leading-[1.35] tracking-[0.01em]">
         家族も、ベンチ外も、
         <br />
-        <span className="inline-block rounded bg-accent px-1.5 text-[#1a1a1a]">
-          みんなで
-        </span>
-        リアルタイムに
+        みんなで リアルタイムに
         <br />
-        試合を追える。
+        <span className="inline-block rounded bg-accent px-1.5 text-[#1a1a1a]">
+          試合を追える
+        </span>
+        。
       </h1>
 
       <p className="relative z-[1] mb-6 text-[14px] leading-[1.7] opacity-95">
-        得点板のないグラウンドでも、家族や保護者が
-        <br />
-        リアルタイムでスコアを追えます。
+        得点板のないグラウンドでも、リアルタイムでスコアを共有。
         <br />
         スコアラーはスマホ1台、観客はQRを読むだけ。
       </p>
 
-      <Link
-        href="/games/new"
-        className="relative z-[1] mb-2.5 block w-full rounded-2xl bg-white py-4 text-center text-base font-extrabold text-brand-dark shadow-[0_4px_16px_rgba(0,0,0,0.18)] active:bg-white/90"
-      >
-        ＋ 今日の試合で試してみる
-      </Link>
-      <div className="relative z-[1] flex justify-center gap-5">
-        <a
-          href="#how-to-use"
-          className="text-[13px] text-white/90 underline underline-offset-[3px]"
+      <div className="relative z-[1] mb-5 flex gap-2.5">
+        <Link
+          href="/games/new"
+          className="flex-1 rounded-2xl bg-white py-3.5 text-center text-[13px] font-extrabold text-brand-dark shadow-[0_4px_16px_rgba(0,0,0,0.18)] active:bg-white/90"
         >
-          使い方を見る ↓
-        </a>
+          ＋ 今日の試合で試してみる
+        </Link>
         <Link
           href="/games/sample"
-          className="text-[13px] text-white/90 underline underline-offset-[3px]"
+          className="flex-1 rounded-2xl border-2 border-white/60 py-3.5 text-center text-[13px] font-bold text-white active:bg-white/10"
         >
           観戦体験してみる →
         </Link>
       </div>
 
-      <div className="relative z-[1] mt-[22px] flex items-center justify-center gap-3.5 text-[11px] opacity-90">
+      <div className="relative z-[1] flex items-center justify-center gap-4 text-[11px] opacity-90">
         <HeroMetaCheck>アカウント不要</HeroMetaCheck>
         <HeroMetaCheck>完全無料</HeroMetaCheck>
         <HeroMetaCheck>インストール不要</HeroMetaCheck>
@@ -119,21 +111,12 @@ function Hero() {
 
 function HeroMetaCheck({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1">
-      <svg
-        width="12"
-        height="12"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <polyline points="20 6 9 17 4 12" />
-      </svg>
-      {children}
+    <span className="inline-flex items-center gap-1.5">
+      <span
+        aria-hidden
+        className="inline-block h-2 w-2 shrink-0 rounded-full bg-accent"
+      />
+      <span style={{ fontFamily: "var(--font-mono)" }}>{children}</span>
     </span>
   );
 }
