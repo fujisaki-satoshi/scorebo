@@ -122,8 +122,9 @@ export default function KeyringSettingsPage() {
     <div className="min-h-screen bg-canvas px-5 pt-4 pb-16">
       {/* Header */}
       <div className="mb-6 flex items-center gap-2">
-        <Link href="/games" className="flex items-center gap-1 text-[13px] text-ink-sub">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        <Link href="/games" className="flex items-center gap-1 text-[13px] text-ink-sub" aria-label="試合一覧へ戻る">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          戻る
         </Link>
         <h1 className="text-[17px] font-bold text-ink">設定</h1>
       </div>
@@ -185,7 +186,7 @@ export default function KeyringSettingsPage() {
             )}
 
             <p className="mb-3 font-mono text-[10.5px] text-ink-sub">
-              作成 · {keySession?.keyPrefix ? "取得済" : "—"} / 最終利用 · 今日
+              作成 · {keySession?.keyPrefix ? "取得済" : "—"}
             </p>
 
             {/* Action buttons */}

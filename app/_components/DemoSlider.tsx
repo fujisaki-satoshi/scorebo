@@ -140,9 +140,10 @@ function ScreenInput({ active }: { active: boolean }) {
           </div>
         </div>
 
-        {/* Save button */}
-        <div className="mt-3 rounded-lg bg-brand py-2 text-center text-[10px] font-bold text-white">
-          4回を保存する
+        {/* Autosave indicator */}
+        <div className="mt-3 flex items-center justify-center gap-1 text-[9px] text-ink-sub">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" />
+          自動保存されました
         </div>
       </div>
     </div>

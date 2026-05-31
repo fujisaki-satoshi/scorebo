@@ -266,9 +266,6 @@ export function GamesList() {
         >
           ＋ 試合を作成する
         </Link>
-        <div className="mt-1.5 text-center text-[10px] text-ink-sub/50">
-          {process.env.NEXT_PUBLIC_BUILD_TIME ?? "dev"}
-        </div>
       </div>
     </>
   );

@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+  other: {
+    "x-build": process.env.NEXT_PUBLIC_BUILD_TIME ?? "dev",
+  },
   openGraph: {
     type: "website",
     locale: "ja_JP",

@@ -87,6 +87,17 @@ npm start           # 本番サーバー起動
 
 Vercel に `main` ブランチを連携してあるため、`main` への push で自動デプロイされます。Pull Request にはプレビュー URL が払い出されます。
 
+### デプロイ確認 (ビルドバージョン)
+
+各ページの HTML に `<meta name="x-build">` としてビルド日時が埋め込まれています。
+
+```bash
+curl -s https://scorebo.vercel.app/ | grep x-build
+# → <meta name="x-build" content="2026-06-01T10:00:00Z"/>
+```
+
+環境変数 `NEXT_PUBLIC_BUILD_TIME` をビルド時に設定すると任意の値を埋め込めます (`vercel.json` または Vercel Dashboard の Build Command で指定)。未設定の場合は `"dev"` が入ります。
+
 ## Firestore セキュリティルール
 
 `firestore.rules` がリポジトリに含まれています。デプロイには Firebase CLI を使います。

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 
+import { SportIcon } from "@/app/_components/SportIcon";
+
 export const metadata: Metadata = {
   title: "サンプル試合 — スコアボ",
   description: "スコアボのサンプル試合です。実際の観戦画面を体験できます。",
@@ -68,10 +70,7 @@ export default function SamplePage() {
       {/* スコアヘッダー */}
       <section className="bg-gradient-to-b from-brand to-brand-dark px-[18px] pt-3.5 pb-[18px] text-white">
         <div className="mb-2 flex items-center gap-2 text-[12px] opacity-95">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 8v4l3 3" />
-          </svg>
+          <SportIcon sport="baseball" size={14} />
           <span>野球</span>
           <span>·</span>
           <span>{SAMPLE.date}</span>
