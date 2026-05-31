@@ -60,7 +60,6 @@ export default function KeyDisplayPage() {
     typeof window !== "undefined" ? sessionStorage.getItem("scorebo:new_key") : null,
   );
   const [methods, setMethods] = useState<SaveMethods>(getSaveMethods());
-  const [screenshotCountdown, setScreenshotCountdown] = useState<number | null>(null);
   const [showSaveWarning, setShowSaveWarning] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -85,14 +84,9 @@ export default function KeyDisplayPage() {
     }
   }
 
-  async function handleScreenshot() {
+  function handleScreenshot() {
     if (!code) return;
-    setScreenshotCountdown(3);
-    for (let i = 2; i >= 0; i--) {
-      await new Promise((r) => setTimeout(r, 1000));
-      setScreenshotCountdown(i === 0 ? null : i);
-    }
-    await patchSaveMethod("screenshot", true);
+    patchSaveMethod("screenshot", true);
   }
 
   function handleLine() {
@@ -202,13 +196,6 @@ export default function KeyDisplayPage() {
           別の端末でも、すべての記録が戻ります。
         </p>
       </div>
-
-      {/* Screenshot countdown overlay */}
-      {screenshotCountdown !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <p className="text-[80px] font-bold text-white">{screenshotCountdown}</p>
-        </div>
-      )}
 
       {/* Save options */}
       <div className="mb-4">

@@ -3,14 +3,9 @@ import { ImageResponse } from "next/og";
 import { findInning, totalSlots, totals } from "@/lib/games";
 import { loadGoogleFont } from "@/lib/og-fonts";
 import { SPORT_META } from "@/lib/sports";
-import type { Game, InningScore, Sport } from "@/lib/types";
+import type { Game } from "@/lib/types";
 
-export const alt = "試合スコア";
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
-export const revalidate = 0;
-
-const SITE_URL_BASE = "scorebo.vercel.app";
+export const OG_SIZE = { width: 1200, height: 630 };
 
 function formatDate(date: string): string {
   const [yStr, mStr, dStr] = date.split("-");
@@ -18,133 +13,57 @@ function formatDate(date: string): string {
   const m = Number(mStr);
   const d = Number(dStr);
   if (!y || !m || !d) return date;
-  const dow = ["日", "月", "火", "水", "木", "金", "土"][
-    new Date(y, m - 1, d).getDay()
-  ];
+  const dow = ["日", "月", "火", "水", "木", "金", "土"][new Date(y, m - 1, d).getDay()];
   const thisYear = new Date().getFullYear();
   const head = y === thisYear ? `${m}月${d}日` : `${y}年${m}月${d}日`;
   return `${head}(${dow})`;
 }
 
-type FsValue = {
-  stringValue?: string;
-  integerValue?: string;
-  doubleValue?: number;
-  booleanValue?: boolean;
-  arrayValue?: { values?: FsValue[] };
-  mapValue?: { fields?: Record<string, FsValue> };
-  nullValue?: null;
-};
-
-function fsToVal(v: FsValue | undefined): unknown {
-  if (!v) return undefined;
-  if (v.stringValue !== undefined) return v.stringValue;
-  if (v.integerValue !== undefined) return Number(v.integerValue);
-  if (v.doubleValue !== undefined) return v.doubleValue;
-  if (v.booleanValue !== undefined) return v.booleanValue;
-  if (v.nullValue !== undefined) return null;
-  if (v.arrayValue) return (v.arrayValue.values ?? []).map(fsToVal);
-  if (v.mapValue) {
-    const out: Record<string, unknown> = {};
-    for (const [k, val] of Object.entries(v.mapValue.fields ?? {})) {
-      out[k] = fsToVal(val);
-    }
-    return out;
-  }
-  return undefined;
-}
-
-async function loadGameByViewToken(viewToken: string): Promise<{ game: Game; viewToken: string } | null> {
-  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-  if (!projectId) return null;
-
-  const vtUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/view_tokens/${encodeURIComponent(viewToken)}`;
-  const vtRes = await fetch(vtUrl, { cache: "no-store" });
-  if (!vtRes.ok) return null;
-  const vtBody = (await vtRes.json()) as { fields?: Record<string, FsValue> };
-  const gameId = fsToVal(vtBody.fields?.game_id) as string | undefined;
-  if (!gameId) return null;
-
-  const gameUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/games/${encodeURIComponent(gameId)}`;
-  const gameRes = await fetch(gameUrl, { cache: "no-store" });
-  if (gameRes.status === 404) return null;
-  if (!gameRes.ok) throw new Error(`firestore rest: ${gameRes.status}`);
-  const body = (await gameRes.json()) as { fields?: Record<string, FsValue> };
-  const f = body.fields ?? {};
-  const inningsRaw = (fsToVal(f.innings) as unknown[]) ?? [];
-  const innings: InningScore[] = inningsRaw.map((row) => {
-    const r = row as { inning: number; top: number | null; bottom: number | null };
-    return { inning: r.inning, top: r.top ?? null, bottom: r.bottom ?? null };
-  });
-  return {
-    game: {
-      id: gameId,
-      sport: fsToVal(f.sport) as Sport,
-      date: (fsToVal(f.date) as string) ?? "",
-      location: (fsToVal(f.location) as string) ?? "",
-      team_top: (fsToVal(f.team_top) as string) ?? "",
-      team_bottom: (fsToVal(f.team_bottom) as string) ?? "",
-      innings,
-      max_innings: (fsToVal(f.max_innings) as number) ?? 9,
-      status: (fsToVal(f.status) as Game["status"]) ?? "in_progress",
-      created_at: null as unknown as Game["created_at"],
-      updated_at: null,
+export async function buildNotFoundImageResponse(): Promise<ImageResponse> {
+  const text = "試合が見つかりません — スコアボ";
+  const fontJp = await loadGoogleFont("Noto Sans JP", 700, text).catch(() => null);
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#1a7a35",
+          color: "#fff",
+          fontSize: 56,
+          fontWeight: 700,
+          fontFamily: "NotoSansJP",
+        }}
+      >
+        {text}
+      </div>
+    ),
+    {
+      ...OG_SIZE,
+      fonts: fontJp
+        ? [{ name: "NotoSansJP", data: fontJp, weight: 700, style: "normal" }]
+        : undefined,
     },
-    viewToken,
-  };
+  );
 }
 
-export default async function Image({
-  params,
-}: {
-  params: Promise<{ viewToken: string }>;
-}) {
-  const { viewToken } = await params;
-  const result = await loadGameByViewToken(viewToken).catch(() => null);
-
-  if (!result) {
-    const text = "試合が見つかりません — スコアボ";
-    const fontJp = await loadGoogleFont("Noto Sans JP", 700, text).catch(() => null);
-    return new ImageResponse(
-      (
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "#1a7a35",
-            color: "#fff",
-            fontSize: 56,
-            fontWeight: 700,
-            fontFamily: "NotoSansJP",
-          }}
-        >
-          {text}
-        </div>
-      ),
-      {
-        ...size,
-        fonts: fontJp
-          ? [{ name: "NotoSansJP", data: fontJp, weight: 700, style: "normal" }]
-          : undefined,
-      },
-    );
-  }
-
-  const { game } = result;
+export async function buildScoreImageResponse(
+  game: Game,
+  displayUrl: string,
+): Promise<ImageResponse> {
   const meta = SPORT_META[game.sport];
   const { top, bottom } = totals(game.innings);
   const slots = Math.min(totalSlots(game.innings, game.max_innings), 9);
   const inningNumbers = Array.from({ length: slots }, (_, i) => i + 1);
   const dateStr = formatDate(game.date);
-  const url = `${SITE_URL_BASE}/watch/${viewToken}`;
 
   const usedText =
     `スコアボ${meta.label}${game.team_top}${game.team_bottom}` +
     `${dateStr}${game.location ?? ""}先攻後攻計R回無料登録不要月火水木金土日年` +
-    `${url}`;
+    `${displayUrl}`;
   const numText = "0123456789−vs −";
 
   const [fontRegular, fontBold] = await Promise.all([
@@ -231,12 +150,7 @@ export default async function Image({
     last: boolean,
   ) {
     return (
-      <div
-        style={{
-          display: "flex",
-          borderBottom: last ? "none" : "1px solid #e2e6e2",
-        }}
-      >
+      <div style={{ display: "flex", borderBottom: last ? "none" : "1px solid #e2e6e2" }}>
         <div style={labelCell}>{label}</div>
         {inningNumbers.map((n) => {
           const v = getValue(n);
@@ -264,6 +178,7 @@ export default async function Image({
           color: "#1c1c1c",
         }}
       >
+        {/* Header */}
         <div
           style={{
             display: "flex",
@@ -300,6 +215,7 @@ export default async function Image({
           </div>
         </div>
 
+        {/* Mid */}
         <div
           style={{
             flex: 1,
@@ -332,7 +248,9 @@ export default async function Image({
               marginBottom: 24,
             }}
           >
-            <div style={{ flex: 1, display: "flex", fontSize: 44, fontWeight: 700, lineHeight: 1.1 }}>
+            <div
+              style={{ flex: 1, display: "flex", fontSize: 44, fontWeight: 700, lineHeight: 1.1 }}
+            >
               {game.team_top || "—"}
             </div>
             <div
@@ -367,6 +285,7 @@ export default async function Image({
             </div>
           </div>
 
+          {/* Innings table */}
           <div
             style={{
               display: "flex",
@@ -408,11 +327,22 @@ export default async function Image({
               ))}
               <div style={totalHead}>R</div>
             </div>
-            {renderRow(game.team_top || "先攻", (n) => findInning(game.innings, n)?.top, top, false)}
-            {renderRow(game.team_bottom || "後攻", (n) => findInning(game.innings, n)?.bottom, bottom, true)}
+            {renderRow(
+              game.team_top || "先攻",
+              (n) => findInning(game.innings, n)?.top,
+              top,
+              false,
+            )}
+            {renderRow(
+              game.team_bottom || "後攻",
+              (n) => findInning(game.innings, n)?.bottom,
+              bottom,
+              true,
+            )}
           </div>
         </div>
 
+        {/* Bottom bar */}
         <div
           style={{
             display: "flex",
@@ -425,7 +355,7 @@ export default async function Image({
           }}
         >
           <div style={{ display: "flex", fontSize: 22, color: "#1a7a35", fontWeight: 700 }}>
-            {url}
+            {displayUrl}
           </div>
           <div
             style={{
@@ -442,6 +372,6 @@ export default async function Image({
         </div>
       </div>
     ),
-    { ...size, fonts },
+    { ...OG_SIZE, fonts },
   );
 }

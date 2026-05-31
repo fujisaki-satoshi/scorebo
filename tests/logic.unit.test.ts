@@ -151,6 +151,19 @@ describe("currentInning", () => {
     }));
     expect(currentInning(innings, 9)).toBe(9);
   });
+
+  // autosave: top のみ保存して bottom が null の状態
+  it("top のみ保存・bottom が null のイニングはまだ進行中として返す", () => {
+    const innings: InningScore[] = [
+      { inning: 1, top: 3, bottom: 0 },
+      { inning: 2, top: 1, bottom: null },
+    ];
+    expect(currentInning(innings, 9)).toBe(2);
+  });
+
+  it("1 回表のみ保存（bottom null）の場合は 1 回を返す", () => {
+    expect(currentInning([{ inning: 1, top: 2, bottom: null }], 9)).toBe(1);
+  });
 });
 
 // ─── lastRecordedInning / totalSlots ─────────────────────────────────────────

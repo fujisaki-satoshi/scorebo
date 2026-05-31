@@ -11,7 +11,6 @@ import {
   currentInning,
   findInning,
   getPillStatus,
-  hasAnyScore,
   setInning,
   totals,
   updateInnings,
@@ -38,7 +37,13 @@ export function GameView({ id }: { id: string }) {
   const [localTop, setLocalTop] = useState(0);
   const [localBottom, setLocalBottom] = useState(0);
   const [localBottomSkip, setLocalBottomSkip] = useState(false);
+  const [topDirty, setTopDirty] = useState(false);
+  const [bottomDirty, setBottomDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Always-current snapshot for use inside setTimeout callbacks
+  const saveDataRef = useRef({ game, editingInning, localTop, localBottom, localBottomSkip, topDirty, bottomDirty });
 
   const [modal, setModal] = useState<Modal>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -56,6 +61,11 @@ export function GameView({ id }: { id: string }) {
   }, [id]);
 
   // initialize editing inning when game loads
+  // Keep saveDataRef in sync with latest state/props for use in setTimeout callbacks
+  useEffect(() => {
+    saveDataRef.current = { game, editingInning, localTop, localBottom, localBottomSkip, topDirty, bottomDirty };
+  });
+
   useEffect(() => {
     if (!game || editingInning !== null) return;
     const cur = currentInning(game.innings, game.max_innings);
@@ -75,7 +85,13 @@ export function GameView({ id }: { id: string }) {
   const switchInning = useCallback(
     (n: number) => {
       if (!game) return;
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
       setEditingInning(n);
+      setTopDirty(false);
+      setBottomDirty(false);
       const slot = findInning(game.innings, n);
       setLocalTop(slot?.top ?? 0);
       const b = slot?.bottom;
@@ -89,6 +105,50 @@ export function GameView({ id }: { id: string }) {
     },
     [game],
   );
+
+  function scheduleAutosave() {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      const { game, editingInning, localTop, localBottom, localBottomSkip, topDirty, bottomDirty } = saveDataRef.current;
+      if (!game || editingInning === null || (!topDirty && !bottomDirty)) return;
+      setSaving(true);
+      setError(null);
+      try {
+        const existing = findInning(game.innings, editingInning);
+        const effectiveTop = topDirty ? localTop : (existing?.top ?? null);
+        const effectiveBottom: number | null | "skip" = bottomDirty
+          ? (localBottomSkip ? "skip" : localBottom)
+          : (existing?.bottom ?? null);
+        const nextInnings = setInning(game.innings, editingInning, effectiveTop, effectiveBottom);
+        await updateInnings(game.id, nextInnings);
+        track("inning_saved", { sport: game.sport, inning: editingInning });
+        setTopDirty(false);
+        setBottomDirty(false);
+      } catch (e) {
+        setError((e as Error).message);
+      } finally {
+        setSaving(false);
+      }
+    }, 1000);
+  }
+
+  function handleTopChange(n: number) {
+    setLocalTop(n);
+    setTopDirty(true);
+    scheduleAutosave();
+  }
+
+  function handleBottomChange(n: number) {
+    setLocalBottom(n);
+    setBottomDirty(true);
+    scheduleAutosave();
+  }
+
+  function handleToggleSkip() {
+    setLocalBottomSkip((s) => !s);
+    setBottomDirty(true);
+    scheduleAutosave();
+  }
 
   if (notFound) {
     return (
@@ -119,33 +179,6 @@ export function GameView({ id }: { id: string }) {
   const { top, bottom } = totals(game.innings);
   const { pillText, pillVariant } = getPillStatus(game.innings, game.max_innings, game.status);
   const slots = Math.max(game.max_innings, game.innings.reduce((m, s) => Math.max(m, s.inning), 0));
-
-  async function handleSaveInning() {
-    if (!game || editingInning === null) return;
-    setSaving(true);
-    setError(null);
-    try {
-      const nextInnings = setInning(game.innings, editingInning, localTop, localBottomSkip ? "skip" : localBottom);
-      await updateInnings(game.id, nextInnings);
-      track("inning_saved", { sport: game.sport, inning: editingInning });
-      const advance = currentInning(nextInnings, game.max_innings);
-      setEditingInning(advance);
-      const slot = findInning(nextInnings, advance);
-      setLocalTop(slot?.top ?? 0);
-      const advB = slot?.bottom;
-      if (advB === "skip") {
-        setLocalBottomSkip(true);
-        setLocalBottom(0);
-      } else {
-        setLocalBottomSkip(false);
-        setLocalBottom(advB ?? 0);
-      }
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setSaving(false);
-    }
-  }
 
   async function handleToggleStatus() {
     if (!game) return;
@@ -256,27 +289,32 @@ export function GameView({ id }: { id: string }) {
       </div>
 
       <div className="mx-4 mt-3.5 rounded-2xl border border-line bg-card px-4 py-3.5">
-        <div className="mb-3 flex items-center gap-1.5 text-[13px] font-semibold text-ink">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-brand">
-            <path d="M12 20h9" />
-            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
-          </svg>
-          <span>{editingInning}回の得点を入力</span>
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-1.5 text-[13px] font-semibold text-ink">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-brand">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
+            <span>{editingInning}回の得点を入力</span>
+          </div>
+          {saving && (
+            <span className="text-[11px] text-ink-sub">保存中…</span>
+          )}
         </div>
 
         <StepperRow
           label={game.team_top || "先攻"}
           side="先攻"
           value={localTop}
-          onChange={setLocalTop}
+          onChange={handleTopChange}
         />
         <div className="border-t border-dashed border-line">
           <BottomRow
             label={game.team_bottom || "後攻"}
             value={localBottom}
-            onChange={setLocalBottom}
+            onChange={handleBottomChange}
             skipped={localBottomSkip}
-            onToggleSkip={() => setLocalBottomSkip((s) => !s)}
+            onToggleSkip={handleToggleSkip}
           />
         </div>
 
@@ -285,19 +323,6 @@ export function GameView({ id }: { id: string }) {
             保存に失敗しました: {error}
           </div>
         )}
-
-        <button
-          type="button"
-          onClick={handleSaveInning}
-          disabled={saving}
-          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-4 text-base font-bold text-white active:bg-brand-dark disabled:opacity-50"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-            <path d="M17 21v-8H7v8M7 3v5h8" />
-          </svg>
-          {saving ? "保存中…" : `${editingInning}回を保存する`}
-        </button>
       </div>
 
       <div className="mx-4 my-4 grid grid-cols-2 gap-2.5">
