@@ -1,3 +1,5 @@
+<a name="japanese"></a>
+
 # スコアボ (scorebo) — 野球・ソフトのスコアを記録して、QRで即共有
 
 **日本語** | [English](#english)
@@ -180,7 +182,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=
 <a name="english"></a>
 # scorebo — record baseball/softball scores and share them instantly by QR
 
-[日本語](#スコアボ-scorebo--野球ソフトのスコアを記録してqrで即共有) | **English**
+[日本語](#japanese) | **English**
 
 A web app for recording game scores inning by inning on your phone and **sharing them on the spot via QR code or URL**. Supports baseball, softball, and kickball, with no account required — open it and start.
 
