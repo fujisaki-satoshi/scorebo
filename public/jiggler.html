@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E7C86">
+<title>マウスジグラー</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#EEF1F4; --surface:#FFFFFF; --surface-2:#F5F7F9;
+    --ink:#161D26; --muted:#5A6675; --line:#D8DEE5;
+    --accent:#0E7C86; --accent-ink:#08525A;
+    --run:#128A42; --run-soft:#E4F4EA; --caution:#B25410;
+    --shadow:rgba(20,30,45,.10);
+    --sans:"IBM Plex Sans JP",-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0C1116; --surface:#151C22; --surface-2:#1C262D;
+      --ink:#E7EDF2; --muted:#93A0AC; --line:#28323B;
+      --accent:#2DD4BF; --accent-ink:#8AF0E2;
+      --run:#34D07A; --run-soft:#123023; --caution:#E0913A;
+      --shadow:rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0C1116; --surface:#151C22; --surface-2:#1C262D;
+    --ink:#E7EDF2; --muted:#93A0AC; --line:#28323B;
+    --accent:#2DD4BF; --accent-ink:#8AF0E2;
+    --run:#34D07A; --run-soft:#123023; --caution:#E0913A;
+    --shadow:rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:820px;margin:0 auto;padding-block:28px 40px;padding-inline:16px;
+    display:flex;flex-direction:column;gap:18px;}
+
+  /* header */
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .brand{display:flex;flex-direction:column;gap:2px;}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--accent-ink);font-weight:600;}
+  :root:not([data-theme="light"]) .eyebrow, :root[data-theme="dark"] .eyebrow{color:var(--accent);}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .eyebrow{color:var(--accent);}}
+  h1{font-size:26px;font-weight:700;margin:0;letter-spacing:.01em;text-wrap:balance;}
+  .wake{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);
+    font-family:var(--mono);background:var(--surface);border:1px solid var(--line);
+    border-radius:999px;padding:6px 12px;}
+  .wake .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none;}
+  .wake.on .dot{background:var(--run);box-shadow:0 0 0 3px var(--run-soft);}
+
+  /* control card */
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    box-shadow:0 1px 2px var(--shadow);padding:18px;display:flex;flex-direction:column;gap:16px;}
+  .controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  button{font-family:var(--sans);cursor:pointer;border:none;}
+  .btn-main{flex:1 1 200px;min-height:60px;border-radius:12px;font-size:18px;font-weight:700;
+    color:#fff;background:var(--accent);display:flex;align-items:center;justify-content:center;gap:10px;
+    transition:transform .08s ease,filter .15s ease;letter-spacing:.02em;}
+  .btn-main:hover{filter:brightness(1.06)}
+  .btn-main:active{transform:translateY(1px)}
+  .btn-main.running{background:var(--caution)}
+  .btn-ghost{min-height:60px;padding:0 18px;border-radius:12px;font-size:14px;font-weight:600;
+    color:var(--ink);background:var(--surface-2);border:1px solid var(--line);}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent-ink)}
+  :root:not([data-theme="light"]) .btn-ghost:hover,:root[data-theme="dark"] .btn-ghost:hover{color:var(--accent)}
+
+  /* readouts */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+  .stat{background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:3px;}
+  .stat .k{font-size:11px;color:var(--muted);letter-spacing:.04em;}
+  .stat .v{font-family:var(--mono);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;
+    line-height:1.1;}
+  .stat .v small{font-size:12px;font-weight:400;color:var(--muted);margin-left:2px;}
+  .stat.state .v{font-size:18px;font-family:var(--sans);font-weight:700;color:var(--muted);}
+  .stat.state.live .v{color:var(--run)}
+
+  /* settings */
+  .settings{display:flex;flex-direction:column;gap:14px;border-top:1px solid var(--line);padding-top:16px;}
+  .field{display:flex;flex-direction:column;gap:8px;}
+  .field .lab{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;font-weight:600;}
+  .field .lab .val{font-family:var(--mono);font-size:14px;color:var(--accent-ink);}
+  :root:not([data-theme="light"]) .field .lab .val,:root[data-theme="dark"] .field .lab .val{color:var(--accent)}
+  input[type=range]{width:100%;accent-color:var(--accent);height:22px;}
+  .field .hint{font-size:12px;color:var(--muted);}
+  .field.disabled{opacity:.4;pointer-events:none;}
+  .seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px;}
+  .seg button{flex:1;padding:8px 14px;border-radius:7px;font-size:13px;font-weight:600;
+    color:var(--muted);background:transparent;min-width:90px;}
+  .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px var(--shadow);}
+  .row{display:flex;gap:16px;flex-wrap:wrap;}
+  .row .field{flex:1 1 220px;}
+  .toggle{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:600;}
+  .toggle input{width:0;height:0;opacity:0;position:absolute;}
+  .toggle .track{width:44px;height:26px;border-radius:999px;background:var(--surface-2);
+    border:1px solid var(--line);position:relative;transition:background .15s;flex:none;}
+  .toggle .track::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+    background:var(--muted);transition:transform .15s,background .15s;}
+  .toggle input:checked+.track{background:var(--accent)}
+  .toggle input:checked+.track::after{transform:translateX(18px);background:#fff}
+  .toggle input:focus-visible+.track{outline:2px solid var(--accent);outline-offset:2px;}
+
+  /* stage */
+  .stage-wrap{position:relative;}
+  .stage{position:relative;width:100%;height:min(56vh,440px);border-radius:16px;overflow:hidden;
+    border:1px solid var(--line);background:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.04);}
+  .stripes{position:absolute;inset:-30%;background-color:#fff;background-repeat:repeat;
+    image-rendering:pixelated;image-rendering:crisp-edges;will-change:background-position;}
+  .stripes.invert{filter:invert(1);}
+  .stage-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    text-align:center;padding:22px;transition:opacity .3s;}
+  .stage-hint .card{background:rgba(255,255,255,.92);color:#161D26;border-radius:12px;
+    padding:14px 20px;font-size:14px;font-weight:600;box-shadow:0 4px 18px rgba(0,0,0,.18);max-width:340px;}
+  .stage-hint .card .mouse{font-size:30px;display:block;margin-bottom:4px;}
+  .running .stage-hint{opacity:0;pointer-events:none;}
+
+  /* fullscreen */
+  .fs-bar{display:none;}
+  body.stage-full{overflow:hidden;}
+  body.stage-full .stage-wrap{position:fixed;inset:0;z-index:60;}
+  body.stage-full .stage{height:100%;border-radius:0;border:none;}
+  body.stage-full .wrap>*:not(.stage-wrap){display:none;}
+  body.stage-full .fs-bar{display:flex;position:fixed;z-index:61;top:14px;right:14px;gap:8px;}
+  .fs-bar button{background:rgba(20,26,32,.72);color:#fff;border:1px solid rgba(255,255,255,.18);
+    border-radius:10px;padding:10px 16px;font-size:14px;font-weight:600;backdrop-filter:blur(6px);}
+  .fs-bar button.stop{background:rgba(178,84,16,.9)}
+
+  /* usage / note */
+  .use{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .use .step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;}
+  .use .step .n{font-family:var(--mono);font-size:12px;color:var(--accent-ink);font-weight:600;}
+  :root:not([data-theme="light"]) .use .step .n,:root[data-theme="dark"] .use .step .n{color:var(--accent)}
+  .use .step p{margin:6px 0 0;font-size:13px;}
+  .note{font-size:12px;color:var(--muted);border-left:3px solid var(--caution);
+    padding:8px 0 8px 14px;background:linear-gradient(90deg,var(--surface),transparent);border-radius:2px;}
+  .note b{color:var(--caution)}
+
+  @media (max-width:560px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .use{grid-template-columns:1fr}
+    h1{font-size:22px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .btn-main,.toggle .track,.toggle .track::after,.stage-hint{transition:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <span class="eyebrow">Screen Awake · Optical</span>
+      <h1>マウスジグラー</h1>
+    </div>
+    <div class="wake" id="wake" role="status">
+      <span class="dot"></span><span id="wakeText">この端末のロック防止：待機</span>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="controls">
+      <button class="btn-main" id="toggle" aria-pressed="false">
+        <span id="toggleIcon">▶</span><span id="toggleText">開始</span>
+      </button>
+      <button class="btn-ghost" id="fs">⛶ 全画面</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat state" id="stState"><span class="k">状態</span><span class="v">停止中</span></div>
+      <div class="stat"><span class="k">次の動きまで</span><span class="v" id="stNext">—</span></div>
+      <div class="stat"><span class="k">現在の間隔</span><span class="v" id="stInterval">—</span></div>
+      <div class="stat"><span class="k">稼働時間</span><span class="v" id="stElapsed">0<small>:00</small></span></div>
+    </div>
+
+    <div class="settings">
+      <div class="row">
+        <div class="field">
+          <span class="lab">動かし方</span>
+          <div class="seg" role="group" aria-label="動かし方">
+            <button id="modeEco" aria-pressed="true">省エネ</button>
+            <button id="modeCont" aria-pressed="false">連続</button>
+          </div>
+          <span class="hint" id="modeHint">間隔をだんだん延ばし、最大まで到達したらその間隔で動かし続けます。</span>
+        </div>
+        <div class="field" id="intervalField">
+          <span class="lab">最大間隔 <span class="val" id="maxVal">55 秒に1回</span></span>
+          <input type="range" id="maxInterval" min="10" max="60" step="5" value="55">
+          <span class="hint">長くするほど省エネ。ただし空きすぎるとマウスが休止しロックされることがあります。</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <span class="lab">模様の細かさ <span class="val" id="cellVal">中</span></span>
+          <input type="range" id="cell" min="2" max="16" step="1" value="5">
+          <span class="hint">反応しないときの最重要ツマミ。まず「細かめ」寄りで試し、ダメなら少しずつ粗く。</span>
+        </div>
+        <div class="field">
+          <span class="lab">動きの強さ <span class="val" id="strengthVal">中</span></span>
+          <input type="range" id="strength" min="40" max="150" step="10" value="90">
+          <span class="hint">動きの幅と速さ。大きいほど検知されやすくなります。</span>
+        </div>
+      </div>
+      <div class="row">
+        <label class="toggle" for="invert">
+          <input type="checkbox" id="invert"><span class="track"></span>
+          <span>白黒を反転（パネルに合わせて）</span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <div class="stage-wrap">
+    <div class="stage" id="stage">
+      <div class="stripes" id="stripes"></div>
+      <div class="stage-hint" id="hint">
+        <div class="card">
+          <span class="mouse">🖱️</span>
+          このランダム模様の上に<b>光学式マウス</b>を置き、<br>「開始」を押してください（模様が上下左右に動きます）
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="use">
+    <div class="step"><span class="n">STEP 1</span><p>タブレットを<b>水平に</b>置き、この画面を開きます。</p></div>
+    <div class="step"><span class="n">STEP 2</span><p>ステージの模様の上に<b>光学式マウス</b>を裏返さず載せます。</p></div>
+    <div class="step"><span class="n">STEP 3</span><p>「開始」を押す。模様が<b>上下左右</b>に動き、それをマウスが読み取ってPC側のポインタが動きます。</p></div>
+  </div>
+
+  <p class="note">
+    <b>自己責任でご利用ください。</b> 画面ロックのポリシー回避は職場規程に触れる場合があります。
+    離席時の常用は避け、正当な理由があるときのみに。<br>
+    <b>スマホ／タブレットのロック</b>はこのアプリが自動で抑止します（Wake Lock）。より確実にするには、端末の「自動ロック／画面消灯」を<b>なし</b>にし、電源に接続してご利用ください。
+  </p>
+</div>
+
+<div class="fs-bar">
+  <button class="stop" id="fsStop">■ 停止</button>
+  <button id="fsExit">⛶ 戻る</button>
+</div>
+
+<script>
+(function(){
+  var ACTIVE_MS=1600, START_INTERVAL=4, GROWTH=1.6;
+  var running=false, mode='eco', maxInterval=55, invert=false;
+  var cellSize=5, radius=90;                // ノイズ模様のマス(px)と2D円軌道の半径(px)
+  var moveCount=0, startTime=0, curInterval=START_INTERVAL, angle=0;
+  var rafId=null, restTimer=null, uiTimer=null, nextMoveAt=0, activeUntil=0;
+  var wakeLock=null;
+
+  var $=function(id){return document.getElementById(id);};
+  var stripes=$('stripes'), stage=$('stage'), wrapWake=$('wake'), wakeText=$('wakeText');
+  var toggle=$('toggle'), toggleIcon=$('toggleIcon'), toggleText=$('toggleText');
+  var stState=$('stState'), stNext=$('stNext'), stInterval=$('stInterval'), stElapsed=$('stElapsed');
+
+  // ---- settings persistence ----
+  function load(){
+    try{
+      var s=JSON.parse(localStorage.getItem('jiggler2')||'{}');
+      if(s.mode) mode=s.mode;
+      if(typeof s.maxInterval==='number') maxInterval=s.maxInterval;
+      if(typeof s.invert==='boolean') invert=s.invert;
+      if(typeof s.cellSize==='number') cellSize=s.cellSize;
+      if(typeof s.radius==='number') radius=s.radius;
+    }catch(e){}
+  }
+  function save(){
+    try{ localStorage.setItem('jiggler2',JSON.stringify(
+      {mode:mode,maxInterval:maxInterval,invert:invert,cellSize:cellSize,radius:radius})); }catch(e){}
+  }
+
+  // ---- ランダム斑点(ノイズ)模様を生成：規則模様より光学マウスが読みやすい ----
+  function buildNoise(){
+    var tiles=Math.max(20, Math.round(420/cellSize));   // 1辺のマス数（周期を十分大きく）
+    var size=tiles*cellSize;
+    var c=document.createElement('canvas'); c.width=size; c.height=size;
+    var ctx=c.getContext('2d');
+    for(var y=0;y<tiles;y++){
+      for(var x=0;x<tiles;x++){
+        ctx.fillStyle = Math.random()<0.5 ? '#000' : '#fff';
+        ctx.fillRect(x*cellSize, y*cellSize, cellSize, cellSize);
+      }
+    }
+    stripes.style.backgroundImage = 'url('+c.toDataURL()+')';
+  }
+  function words(v,lo,hi){ return v<=lo ? '小さめ' : v>=hi ? '大きめ' : '中'; }
+  function cellWord(v){ return v<=4 ? '細かめ' : v>=10 ? '粗め' : '中'; }
+
+  function applySettingsUI(){
+    $('maxInterval').value=maxInterval;
+    $('maxVal').textContent=maxInterval+' 秒に1回';
+    $('invert').checked=invert;
+    stripes.classList.toggle('invert',invert);
+    $('cell').value=cellSize; $('cellVal').textContent=cellWord(cellSize);
+    $('strength').value=radius; $('strengthVal').textContent=words(radius,60,130);
+    buildNoise();
+    $('modeEco').setAttribute('aria-pressed', mode==='eco');
+    $('modeCont').setAttribute('aria-pressed', mode==='cont');
+    $('intervalField').classList.toggle('disabled', mode==='cont');
+    $('modeHint').textContent = mode==='eco'
+      ? '間隔をだんだん延ばし、最大まで到達したらその間隔で動かし続けます。'
+      : '休みなく縞を動かし続けます。最も確実ですが、その分よく動きます。';
+  }
+
+  // ---- motion ----
+  function runActive(done){
+    var t0=performance.now(), a0=angle;
+    var omega=4;                            // 角速度 rad/s（半径が大きいほど実速度も速い）
+    activeUntil = t0 + ACTIVE_MS;
+    function frame(now){
+      var el=now-t0;
+      angle = a0 + omega*(el/1000);
+      var px=radius*Math.sin(angle), py=radius*Math.cos(angle);   // 上下左右をなめらかに周回
+      stripes.style.backgroundPosition = px+'px '+py+'px';
+      if(running && (mode==='cont' || el<ACTIVE_MS)){
+        rafId=requestAnimationFrame(frame);
+      }else{
+        activeUntil=0;
+        if(done) done();
+      }
+    }
+    rafId=requestAnimationFrame(frame);
+  }
+
+  function cycle(){
+    if(!running) return;
+    runActive(function(){
+      if(!running) return;
+      moveCount++;
+      var wait=curInterval;
+      nextMoveAt=performance.now()+wait*1000;
+      restTimer=setTimeout(cycle, wait*1000);
+      curInterval=Math.min(maxInterval, +(curInterval*GROWTH).toFixed(2));
+    });
+  }
+
+  function start(){
+    if(running) return;
+    running=true; startTime=Date.now(); moveCount=0; curInterval=START_INTERVAL;
+    requestWakeLock();
+    document.body.classList.add('running');
+    toggle.classList.add('running'); toggle.setAttribute('aria-pressed','true');
+    toggleIcon.textContent='■'; toggleText.textContent='停止';
+    stState.classList.add('live'); stState.querySelector('.v').textContent='動作中';
+    if(mode==='cont'){ nextMoveAt=0; runActive(); }
+    else cycle();
+    uiTimer=setInterval(updateReadouts,200);
+    updateReadouts();
+  }
+
+  function stop(){
+    if(!running) return;
+    running=false;
+    if(rafId) cancelAnimationFrame(rafId); rafId=null;
+    if(restTimer){ clearTimeout(restTimer); restTimer=null; }
+    if(uiTimer){ clearInterval(uiTimer); uiTimer=null; }
+    releaseWakeLock();
+    document.body.classList.remove('running');
+    toggle.classList.remove('running'); toggle.setAttribute('aria-pressed','false');
+    toggleIcon.textContent='▶'; toggleText.textContent='開始';
+    stState.classList.remove('live'); stState.querySelector('.v').textContent='停止中';
+    stNext.textContent='—'; stInterval.textContent='—';
+  }
+
+  function fmtTime(ms){
+    var s=Math.floor(ms/1000), m=Math.floor(s/60); s=s%60;
+    return m+'<small>:'+(s<10?'0':'')+s+'</small>';
+  }
+  function updateReadouts(){
+    if(!running) return;
+    stElapsed.innerHTML=fmtTime(Date.now()-startTime);
+    if(mode==='cont'){
+      stNext.textContent='連続';
+      stInterval.textContent='連続';
+      return;
+    }
+    stInterval.innerHTML=Math.round(curInterval)+'<small>秒</small>';
+    if(activeUntil){ stNext.textContent='動作中'; }
+    else{
+      var left=Math.max(0,(nextMoveAt-performance.now())/1000);
+      stNext.innerHTML=left.toFixed(1)+'<small>秒</small>';
+    }
+  }
+
+  // ---- wake lock ----
+  function setWake(state){
+    wrapWake.classList.toggle('on', state==='on');
+    wakeText.textContent = state==='on' ? 'この端末のロック防止：ON'
+      : state==='unsupported' ? 'この端末のロック防止：非対応（端末設定で自動ロックをオフに）'
+      : 'この端末のロック防止：待機';
+  }
+  function requestWakeLock(){
+    if(!('wakeLock' in navigator)){ setWake('unsupported'); return; }
+    navigator.wakeLock.request('screen').then(function(wl){
+      wakeLock=wl; setWake('on');
+      wl.addEventListener('release',function(){ wakeLock=null; setWake('待機'); });
+    }).catch(function(){ setWake('unsupported'); });
+  }
+  function releaseWakeLock(){
+    try{ if(wakeLock) wakeLock.release(); }catch(e){}
+    wakeLock=null; setWake('off');
+  }
+  // 復帰時・操作時に取りこぼしを再取得（端末がロックしにくくなる）
+  document.addEventListener('visibilitychange',function(){
+    if(running && document.visibilityState==='visible' && !wakeLock) requestWakeLock();
+  });
+  document.addEventListener('click',function(){
+    if(running && !wakeLock) requestWakeLock();
+  });
+
+  // ---- fullscreen ----
+  function enterFull(){
+    document.body.classList.add('stage-full');
+    try{ if(stage.requestFullscreen) stage.requestFullscreen(); }catch(e){}
+  }
+  function exitFull(){
+    document.body.classList.remove('stage-full');
+    try{ if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); }catch(e){}
+  }
+  document.addEventListener('fullscreenchange',function(){
+    if(!document.fullscreenElement) document.body.classList.remove('stage-full');
+  });
+
+  // ---- events ----
+  toggle.addEventListener('click',function(){ running?stop():start(); });
+  $('fs').addEventListener('click',enterFull);
+  $('fsExit').addEventListener('click',exitFull);
+  $('fsStop').addEventListener('click',function(){ stop(); exitFull(); });
+
+  $('modeEco').addEventListener('click',function(){ mode='eco'; applySettingsUI(); save(); });
+  $('modeCont').addEventListener('click',function(){ mode='cont'; applySettingsUI(); save(); });
+  $('maxInterval').addEventListener('input',function(){
+    maxInterval=+this.value; $('maxVal').textContent=maxInterval+' 秒に1回';
+    if(running && curInterval>maxInterval) curInterval=maxInterval;
+  });
+  $('maxInterval').addEventListener('change',save);
+  $('invert').addEventListener('change',function(){
+    invert=this.checked; stripes.classList.toggle('invert',invert); save();
+  });
+  $('cell').addEventListener('input',function(){
+    cellSize=+this.value; $('cellVal').textContent=cellWord(cellSize); buildNoise();
+  });
+  $('cell').addEventListener('change',save);
+  $('strength').addEventListener('input',function(){
+    radius=+this.value; $('strengthVal').textContent=words(radius,60,130);
+  });
+  $('strength').addEventListener('change',save);
+
+  // init
+  load();
+  applySettingsUI();
+  setWake('off');
+})();
+</script>
+</body>
+</html>
