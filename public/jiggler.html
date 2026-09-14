@@ -248,9 +248,10 @@
 <script>
 (function(){
   var ACTIVE_MS=1600, START_INTERVAL=4, GROWTH=1.6;
+  var ORBIT_PERIOD=2.2;                     // 1周の秒数。短周期で上下左右へ頻繁に折り返し、片方向ドリフト＆端張り付きを防ぐ
   var running=false, mode='eco', maxInterval=55, invert=false;
-  var cellSize=5, radius=70;                // ノイズ模様のマス(px)と2D円軌道の振れ幅(px・固定)
-  var speed=120;                            // スクロール速度 px/s。60Hzでの1コマ移動=speed/60px。小さいほど追従しやすい
+  var cellSize=5;                           // ノイズ模様のマス(px)
+  var speed=60;                             // スクロール速度 px/s。60Hzでの1コマ移動=speed/60px。小さいほど追従しやすい
   var moveCount=0, startTime=0, curInterval=START_INTERVAL, angle=0;
   var rafId=null, restTimer=null, uiTimer=null, nextMoveAt=0, activeUntil=0;
   var wakeLock=null;
@@ -313,12 +314,13 @@
   // ---- motion ----
   function runActive(done){
     var t0=performance.now(), a0=angle;
-    var omega=speed/radius;                 // 角速度 rad/s（円周の実速度が一定=speed px/s になるよう算出）
+    var omega=2*Math.PI/ORBIT_PERIOD;       // 周期固定（短周期）。片方向ドリフト＆端張り付きを防ぐ
+    var r=speed/omega;                       // 実速度が speed px/s（＝1コマ speed/60px）になる半径を逆算
     activeUntil = t0 + ACTIVE_MS;
     function frame(now){
       var el=now-t0;
       angle = a0 + omega*(el/1000);
-      var px=radius*Math.sin(angle), py=radius*Math.cos(angle);   // 上下左右をなめらかに周回
+      var px=r*Math.sin(angle), py=r*Math.cos(angle);             // 上下左右をなめらかに周回
       stripes.style.backgroundPosition = px+'px '+py+'px';
       if(running && (mode==='cont' || el<ACTIVE_MS)){
         rafId=requestAnimationFrame(frame);
