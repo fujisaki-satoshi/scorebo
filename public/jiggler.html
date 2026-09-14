@@ -201,9 +201,9 @@
           <span class="hint">反応しないときの最重要ツマミ。まず「細かめ」寄りで試し、ダメなら少しずつ粗く。</span>
         </div>
         <div class="field">
-          <span class="lab">動きの強さ <span class="val" id="strengthVal">中</span></span>
-          <input type="range" id="strength" min="40" max="150" step="10" value="90">
-          <span class="hint">動きの幅と速さ。大きいほど検知されやすくなります。</span>
+          <span class="lab">動く速さ <span class="val" id="strengthVal">中</span></span>
+          <input type="range" id="strength" min="30" max="400" step="10" value="120">
+          <span class="hint">速すぎると1コマの跳びが大きくマウスが見失います。まず「遅め」から、動き出すまで少しずつ上げて。</span>
         </div>
       </div>
       <div class="row">
@@ -249,7 +249,8 @@
 (function(){
   var ACTIVE_MS=1600, START_INTERVAL=4, GROWTH=1.6;
   var running=false, mode='eco', maxInterval=55, invert=false;
-  var cellSize=5, radius=90;                // ノイズ模様のマス(px)と2D円軌道の半径(px)
+  var cellSize=5, radius=70;                // ノイズ模様のマス(px)と2D円軌道の振れ幅(px・固定)
+  var speed=120;                            // スクロール速度 px/s。60Hzでの1コマ移動=speed/60px。小さいほど追従しやすい
   var moveCount=0, startTime=0, curInterval=START_INTERVAL, angle=0;
   var rafId=null, restTimer=null, uiTimer=null, nextMoveAt=0, activeUntil=0;
   var wakeLock=null;
@@ -262,17 +263,17 @@
   // ---- settings persistence ----
   function load(){
     try{
-      var s=JSON.parse(localStorage.getItem('jiggler2')||'{}');
+      var s=JSON.parse(localStorage.getItem('jiggler3')||'{}');
       if(s.mode) mode=s.mode;
       if(typeof s.maxInterval==='number') maxInterval=s.maxInterval;
       if(typeof s.invert==='boolean') invert=s.invert;
       if(typeof s.cellSize==='number') cellSize=s.cellSize;
-      if(typeof s.radius==='number') radius=s.radius;
+      if(typeof s.speed==='number') speed=s.speed;
     }catch(e){}
   }
   function save(){
-    try{ localStorage.setItem('jiggler2',JSON.stringify(
-      {mode:mode,maxInterval:maxInterval,invert:invert,cellSize:cellSize,radius:radius})); }catch(e){}
+    try{ localStorage.setItem('jiggler3',JSON.stringify(
+      {mode:mode,maxInterval:maxInterval,invert:invert,cellSize:cellSize,speed:speed})); }catch(e){}
   }
 
   // ---- ランダム斑点(ノイズ)模様を生成：規則模様より光学マウスが読みやすい ----
@@ -291,6 +292,7 @@
   }
   function words(v,lo,hi){ return v<=lo ? '小さめ' : v>=hi ? '大きめ' : '中'; }
   function cellWord(v){ return v<=4 ? '細かめ' : v>=10 ? '粗め' : '中'; }
+  function speedWord(v){ return v<=90 ? '遅め' : v>=250 ? '速め' : '中'; }
 
   function applySettingsUI(){
     $('maxInterval').value=maxInterval;
@@ -298,7 +300,7 @@
     $('invert').checked=invert;
     stripes.classList.toggle('invert',invert);
     $('cell').value=cellSize; $('cellVal').textContent=cellWord(cellSize);
-    $('strength').value=radius; $('strengthVal').textContent=words(radius,60,130);
+    $('strength').value=speed; $('strengthVal').textContent=speedWord(speed);
     buildNoise();
     $('modeEco').setAttribute('aria-pressed', mode==='eco');
     $('modeCont').setAttribute('aria-pressed', mode==='cont');
@@ -311,7 +313,7 @@
   // ---- motion ----
   function runActive(done){
     var t0=performance.now(), a0=angle;
-    var omega=4;                            // 角速度 rad/s（半径が大きいほど実速度も速い）
+    var omega=speed/radius;                 // 角速度 rad/s（円周の実速度が一定=speed px/s になるよう算出）
     activeUntil = t0 + ACTIVE_MS;
     function frame(now){
       var el=now-t0;
@@ -448,7 +450,7 @@
   });
   $('cell').addEventListener('change',save);
   $('strength').addEventListener('input',function(){
-    radius=+this.value; $('strengthVal').textContent=words(radius,60,130);
+    speed=+this.value; $('strengthVal').textContent=speedWord(speed);
   });
   $('strength').addEventListener('change',save);
 
